@@ -1,0 +1,7 @@
+version = 0.29.0
+profile = janestreet
+ocaml-version = 5.3
+margin = 80
+parse-docstrings
+break-separators = before
+break-infix = fit-or-vertical
