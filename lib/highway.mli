@@ -8,6 +8,8 @@
     [response] and [request] so that it can, broadly speaking, be
     adapted to any framework in the OCaaml ecosystem. *)
 
+(** {1 Big Picture} *)
+
 (** {1 Types}
 
     Type aliases to make Highway easier to use. *)
@@ -26,7 +28,13 @@ type ('k, 'out) pattern = ('k, 'out) Pattern.t =
   | Literal : string -> ('a, 'a) pattern
   | Hole : 'a Hole.t -> ('a -> 'b, 'b) pattern
 
-(** Describes a heterogeneous list. *)
+(** The type that describes a road path, which is a heterogeneous list
+    of {!type:pattern}. *)
+type ('k, 'out) path = ('k, 'out) Path.t =
+  | [] : (void, void) path
+  | ( :: ) : ('a, 'b) pattern * ('b, 'c) path -> ('a, 'c) path
+
+(** Describes a heterogeneous list for filling {!type:path}. *)
 type 't args = 't Args.t =
   | [] : void args
   | ( :: ) : 'a * 'b args -> ('a -> 'b) args
@@ -65,3 +73,4 @@ module Void = Void
 module Args = Args
 module Hole = Hole
 module Pattern = Pattern
+module Path = Path
