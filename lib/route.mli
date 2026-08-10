@@ -90,3 +90,6 @@ val html_action : ('scope, Method.for_html_form, 'a) t -> 'a Args.t -> string
 (** [target route args] generates a link for a given [route] (using
     [args]) wihtout any constraints. *)
 val target : ('scope, Method.t, 'a) t -> 'a Args.t -> string
+
+(** [base_url route] returns the root of a global [route]. *)
+val base_url : (global, _, _) t -> string

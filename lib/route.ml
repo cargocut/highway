@@ -58,3 +58,7 @@ let target : type scope. (scope, _, _) t -> _ =
   | Global (base_url, { path = p; _ }) ->
     concat ~base_url @@ Path.to_list p args
 ;;
+
+let base_url = function
+  | Global (x, _) -> x
+;;
