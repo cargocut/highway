@@ -4,10 +4,17 @@
    SPDX-License-Identifier: BSD-3-Clause *)
 
 type (_, _) t =
-  | [] : (Void.t, Void.t) t
+  | [] : ('a, 'a) t
   | ( :: ) : ('a, 'b) Pattern.t * ('b, 'c) t -> ('a, 'c) t
 
-let to_list pattern args =
+let rec append : type a b c. (a, b) t -> (b, c) t -> (a, c) t =
+  fun xs ys ->
+  match xs with
+  | [] -> ys
+  | x :: xs -> x :: append xs ys
+;;
+
+let to_list path args =
   let rec aux : type a. string list -> (a, Void.t) t * a Args.t -> string list =
     fun acc -> function
       | [], [] -> List.rev acc
@@ -16,10 +23,10 @@ let to_list pattern args =
         let s = Hole.to_string hole v in
         aux (s :: acc) (ps, xs)
   in
-  (pattern, args) |> aux []
+  (path, args) |> aux []
 ;;
 
-let from_list pattern path =
+let from_list path input =
   let rec aux : type a. (a, Void.t) t * string list -> a Args.t option =
     function
     | [], [] -> Some []
@@ -34,5 +41,11 @@ let from_list pattern path =
          never happen because the lists are indexed. *)
       None
   in
-  aux (pattern, path)
+  aux (path, input)
 ;;
+
+module Infix = struct
+  let ( ++ ) = append
+end
+
+include Infix

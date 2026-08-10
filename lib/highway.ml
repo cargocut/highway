@@ -21,7 +21,7 @@ type 't args = 't Args.t =
   | ( :: ) : 'a * 'b args -> ('a -> 'b) args
 
 type ('k, 'out) path = ('k, 'out) Path.t =
-  | [] : (void, void) path
+  | [] : ('a, 'a) path
   | ( :: ) : ('a, 'b) pattern * ('b, 'c) path -> ('a, 'c) path
 
 let s = Pattern.s

@@ -31,7 +31,7 @@ type ('k, 'out) pattern = ('k, 'out) Pattern.t =
 (** The type that describes a road path, which is a heterogeneous list
     of {!type:pattern}. *)
 type ('k, 'out) path = ('k, 'out) Path.t =
-  | [] : (void, void) path
+  | [] : ('a, 'a) path
   | ( :: ) : ('a, 'b) pattern * ('b, 'c) path -> ('a, 'c) path
 
 (** Describes a heterogeneous list for filling {!type:path}. *)
