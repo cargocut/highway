@@ -8,8 +8,6 @@
     [response] and [request] so that it can, broadly speaking, be
     adapted to any framework in the OCaaml ecosystem. *)
 
-(** {1 Big Picture} *)
-
 (** {1 Types}
 
     Type aliases to make Highway easier to use. *)
@@ -70,7 +68,13 @@ val char : (char -> 'a, 'a) pattern
 (** Describes a pattern that is a hole capturing [bool]. *)
 val bool : (bool -> 'a, 'a) pattern
 
-(** {1 Defining routes} *)
+(** {1 Routes}
+
+    Routes can be local, to describe resources within the application,
+    or global, to describe external routes (and allow external links
+    to be treated the same way as internal resources). *)
+
+(** {2 Defining local routes} *)
 
 (** [get path] describes a local route, associated to the method [GET]
     for the given [path]. *)
@@ -112,12 +116,35 @@ val query : ('k, void) path -> ([> `Local ], [> `QUERY ], 'k) route
     for the given [path]. *)
 val trace : ('k, void) path -> ([> `Local ], [> `TRACE ], 'k) route
 
-(** {1 Definying global routes}
+(** {2 Defining global routes}
 
     A global route is defined in terms of a local route. *)
 
-(** [global local_route] makes [local_route] global. *)
-val global : ([ `Local ], 'meth, 'k) route -> ([> `Global ], 'meth, 'k) route
+(** [global base_url local_route] makes [local_route] global. *)
+val global
+  :  string
+  -> ([ `Local ], 'meth, 'k) route
+  -> ([> `Global ], 'meth, 'k) route
+
+(** {2 Generate links for routes} *)
+
+(** [html_href route args] generates a link that can be used in a [<a>]
+    tag for a given [route] (using [args]). *)
+val html_href
+  :  ([ `Local | `Global ], Method.for_html_links, 'a) route
+  -> 'a args
+  -> string
+
+(** [html_action route args] generates a link that can be used in a [<form action>]
+    tag for a given [route] (using [args]). *)
+val html_action
+  :  ([ `Local | `Global ], Method.for_html_form, 'a) route
+  -> 'a args
+  -> string
+
+(** [target route args] generates a link for a given [route] (using
+    [args]) wihtout any constraints. *)
+val target : ([ `Local | `Global ], Method.t, 'a) route -> 'a args -> string
 
 (** {1 Internal modules}
 
@@ -130,3 +157,4 @@ module Hole = Hole
 module Pattern = Pattern
 module Path = Path
 module Method = Method
+module Route = Route

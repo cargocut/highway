@@ -66,5 +66,25 @@ val trace : ('k, Void.t) Path.t -> ([> `Local ], [> `TRACE ], 'k) t
 
     A global route is defined in terms of a local route. *)
 
-(** [global local_route] makes [local_route] global. *)
-val global : ([ `Local ], 'meth, 'k) t -> ([> `Global ], 'meth, 'k) t
+(** [global base_url local_route] makes [local_route] global. *)
+val global : string -> ([ `Local ], 'meth, 'k) t -> ([> `Global ], 'meth, 'k) t
+
+(** {1 Compute links from route} *)
+
+(** [html_href route args] generates a link that can be used in a [<a>]
+    tag for a given [route] (using [args]). *)
+val html_href
+  :  ([ `Local | `Global ], Method.for_html_links, 'a) t
+  -> 'a Args.t
+  -> string
+
+(** [html_action route args] generates a link that can be used in a [<form action>]
+    tag for a given [route] (using [args]). *)
+val html_action
+  :  ([ `Local | `Global ], Method.for_html_form, 'a) t
+  -> 'a Args.t
+  -> string
+
+(** [target route args] generates a link for a given [route] (using
+    [args]) wihtout any constraints. *)
+val target : ([ `Local | `Global ], Method.t, 'a) t -> 'a Args.t -> string

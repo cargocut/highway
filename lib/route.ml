@@ -19,12 +19,12 @@ type ('meth, 'k) route =
 
 type ('scope, 'meth, 'k) t =
   | Local : ('meth, 'k) route -> ([> `Local ], 'meth, 'k) t
-  | Global : ('meth, 'k) route -> ([> `Global ], 'meth, 'k) t
+  | Global : string * ('meth, 'k) route -> ([> `Global ], 'meth, 'k) t
 
 let local x = Local x
 
-let global : ([ `Local ], _, _) t -> _ = function
-  | Local route -> Global route
+let global base_url : ([ `Local ], _, _) t -> _ = function
+  | Local route -> Global (base_url, route)
 ;;
 
 let get x = local (GET x)
@@ -37,3 +37,39 @@ let patch x = local (PATCH x)
 let put x = local (PUT x)
 let query x = local (QUERY x)
 let trace x = local (TRACE x)
+
+let get_path = function
+  | CONNECT p
+  | DELETE p
+  | GET p
+  | HEAD p
+  | OPTIONS p
+  | PATCH p
+  | POST p
+  | PUT p
+  | QUERY p
+  | TRACE p -> p
+;;
+
+let concat ?(base_url = "") args = base_url ^ "/" ^ String.concat "/" args
+
+let html_href : ([ `Local | `Global ], Method.for_html_links, _) t -> _ =
+  fun route args ->
+  match route with
+  | Local (GET p) -> concat @@ Path.to_list p args
+  | Global (base_url, GET p) -> concat ~base_url @@ Path.to_list p args
+;;
+
+let html_action : ([ `Local | `Global ], Method.for_html_form, _) t -> _ =
+  fun route args ->
+  match route with
+  | Local (GET p | POST p) -> concat @@ Path.to_list p args
+  | Global (base_url, (GET p | POST p)) ->
+    concat ~base_url @@ Path.to_list p args
+;;
+
+let target route args =
+  match route with
+  | Local r -> concat @@ Path.to_list (get_path r) args
+  | Global (base_url, r) -> concat ~base_url @@ Path.to_list (get_path r) args
+;;

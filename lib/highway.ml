@@ -9,6 +9,7 @@ module Hole = Hole
 module Pattern = Pattern
 module Path = Path
 module Method = Method
+module Route = Route
 
 (* Shortcuts and aliases *)
 
@@ -52,3 +53,9 @@ let put = Route.put
 let query = Route.query
 let trace = Route.trace
 let global = Route.global
+
+(* Routes generation *)
+
+let html_href = Route.html_href
+let html_action = Route.html_action
+let target = Route.target
