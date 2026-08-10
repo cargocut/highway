@@ -18,7 +18,7 @@
       an external link ([`Global]).
     - ['meth] The method of a route, see {!module:Method}.
     - ['k] The typelevel continuation of the path.*)
-type ('scope, 'meth, 'k) t
+type ('scope, +'meth, 'k) t
 
 (** {1 Definying local routes} *)
 
@@ -74,17 +74,17 @@ val global : string -> ([ `Local ], 'meth, 'k) t -> ([> `Global ], 'meth, 'k) t
 (** [html_href route args] generates a link that can be used in a [<a>]
     tag for a given [route] (using [args]). *)
 val html_href
-  :  ([ `Local | `Global ], Method.for_html_links, 'a) t
+  :  ([ `Global | `Local ], Method.for_html_links, 'a) t
   -> 'a Args.t
   -> string
 
 (** [html_action route args] generates a link that can be used in a [<form action>]
     tag for a given [route] (using [args]). *)
 val html_action
-  :  ([ `Local | `Global ], Method.for_html_form, 'a) t
+  :  ([ `Global | `Local ], Method.for_html_form, 'a) t
   -> 'a Args.t
   -> string
 
 (** [target route args] generates a link for a given [route] (using
     [args]) wihtout any constraints. *)
-val target : ([ `Local | `Global ], Method.t, 'a) t -> 'a Args.t -> string
+val target : ([ `Global | `Local ], Method.t, 'a) t -> 'a Args.t -> string

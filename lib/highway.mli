@@ -41,7 +41,7 @@ type 't args = 't Args.t =
   | ( :: ) : 'a * 'b args -> ('a -> 'b) args
 
 (** Describes a route. *)
-type ('scope, 'meth, 'k) route = ('scope, 'meth, 'k) Route.t
+type ('scope, +'meth, 'k) route = ('scope, 'meth, 'k) Route.t
 
 (** {1 Patterns}
 
