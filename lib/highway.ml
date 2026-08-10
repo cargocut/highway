@@ -30,6 +30,8 @@ type ('k, 'out) path = ('k, 'out) Path.t =
   | ( :: ) : ('a, 'b) pattern * ('b, 'c) path -> ('a, 'c) path
 
 type ('scope, +'meth, 'k) route = ('scope, 'meth, 'k) Route.t
+type local = Route.local
+type global = Route.global
 
 (* Patterns and Holes *)
 

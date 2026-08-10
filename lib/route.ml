@@ -10,13 +10,16 @@ type (+'meth, 'k) route =
   ; meth : 'meth
   }
 
+type global = private Global
+type local = private Local
+
 type ('scope, +'meth, 'k) t =
-  | Local : ('meth, 'k) route -> ([> `Local ], 'meth, 'k) t
-  | Global : string * ('meth, 'k) route -> ([> `Global ], 'meth, 'k) t
+  | Local : ('meth, 'k) route -> (local, 'meth, 'k) t
+  | Global : string * ('meth, 'k) route -> (global, 'meth, 'k) t
 
 let local meth path = Local { meth; path }
 
-let global base_url : ([ `Local ], _, _) t -> _ = function
+let global base_url : (local, _, _) t -> _ = function
   | Local route -> Global (base_url, route)
 ;;
 
@@ -32,7 +35,7 @@ let query x = local `QUERY x
 let trace x = local `TRACE x
 let concat ?(base_url = "") args = base_url ^ "/" ^ String.concat "/" args
 
-let html_href : (_, Method.for_html_links, _) t -> _ =
+let html_href : type scope. (scope, Method.for_html_links, _) t -> _ =
   fun route args ->
   match route with
   | Local { meth = `GET; path = p } -> concat @@ Path.to_list p args
@@ -40,7 +43,7 @@ let html_href : (_, Method.for_html_links, _) t -> _ =
     concat ~base_url @@ Path.to_list p args
 ;;
 
-let html_action : (_, Method.for_html_form, _) t -> _ =
+let html_action : type scope. (scope, Method.for_html_form, _) t -> _ =
   fun route args ->
   match route with
   | Local { meth = `GET | `POST; path = p } -> concat @@ Path.to_list p args
@@ -48,7 +51,8 @@ let html_action : (_, Method.for_html_form, _) t -> _ =
     concat ~base_url @@ Path.to_list p args
 ;;
 
-let target route args =
+let target : type scope. (scope, _, _) t -> _ =
+  fun route args ->
   match route with
   | Local { path = p; _ } -> concat @@ Path.to_list p args
   | Global (base_url, { path = p; _ }) ->

@@ -8,11 +8,6 @@
 open struct
   open Alcotest
 
-  (* KLUDGE: Here, we should wrap the routes in `unit` functions;
-     otherwise, they are immediately unified as soon as they are
-     used. But we're only trying to describe the serialization
-     involved, so... *)
-
   let p1 =
     let open Highway in
     get [ s "user"; string; s "age"; int ]

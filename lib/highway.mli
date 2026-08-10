@@ -43,6 +43,12 @@ type 't args = 't Args.t =
 (** Describes a route. *)
 type ('scope, +'meth, 'k) route = ('scope, 'meth, 'k) Route.t
 
+(** Describes the local scope. *)
+type local = Route.local
+
+(** Describes the global scope. *)
+type global = Route.global
+
 (** {1 Patterns}
 
     Pattern Construction (covered in the {!module:Pattern} module). *)
@@ -78,73 +84,64 @@ val bool : (bool -> 'a, 'a) pattern
 
 (** [get path] describes a local route, associated to the method [GET]
     for the given [path]. *)
-val get : ('k, void) path -> ([> `Local ], [> `GET ], 'k) route
+val get : ('k, void) path -> (local, [> `GET ], 'k) route
 
 (** [post path] describes a local route, associated to the method [POST]
     for the given [path]. *)
-val post : ('k, void) path -> ([> `Local ], [> `POST ], 'k) route
+val post : ('k, void) path -> (local, [> `POST ], 'k) route
 
 (** [connect path] describes a local route, associated to the method [CONNECT]
     for the given [path]. *)
-val connect : ('k, void) path -> ([> `Local ], [> `CONNECT ], 'k) route
+val connect : ('k, void) path -> (local, [> `CONNECT ], 'k) route
 
 (** [delete path] describes a local route, associated to the method [DELETE]
     for the given [path]. *)
-val delete : ('k, void) path -> ([> `Local ], [> `DELETE ], 'k) route
+val delete : ('k, void) path -> (local, [> `DELETE ], 'k) route
 
 (** [head path] describes a local route, associated to the method [HEAD]
     for the given [path]. *)
-val head : ('k, void) path -> ([> `Local ], [> `HEAD ], 'k) route
+val head : ('k, void) path -> (local, [> `HEAD ], 'k) route
 
 (** [options path] describes a local route, associated to the method [OPTIONS]
     for the given [path]. *)
-val options : ('k, void) path -> ([> `Local ], [> `OPTIONS ], 'k) route
+val options : ('k, void) path -> (local, [> `OPTIONS ], 'k) route
 
 (** [patch path] describes a local route, associated to the method [PATCH]
     for the given [path]. *)
-val patch : ('k, void) path -> ([> `Local ], [> `PATCH ], 'k) route
+val patch : ('k, void) path -> (local, [> `PATCH ], 'k) route
 
 (** [put path] describes a local route, associated to the method [PUT]
     for the given [path]. *)
-val put : ('k, void) path -> ([> `Local ], [> `PUT ], 'k) route
+val put : ('k, void) path -> (local, [> `PUT ], 'k) route
 
 (** [query path] describes a local route, associated to the method [QUERY]
     for the given [path]. *)
-val query : ('k, void) path -> ([> `Local ], [> `QUERY ], 'k) route
+val query : ('k, void) path -> (local, [> `QUERY ], 'k) route
 
 (** [trace path] describes a local route, associated to the method [TRACE]
     for the given [path]. *)
-val trace : ('k, void) path -> ([> `Local ], [> `TRACE ], 'k) route
+val trace : ('k, void) path -> (local, [> `TRACE ], 'k) route
 
 (** {2 Defining global routes}
 
     A global route is defined in terms of a local route. *)
 
 (** [global base_url local_route] makes [local_route] global. *)
-val global
-  :  string
-  -> ([ `Local ], 'meth, 'k) route
-  -> ([> `Global ], 'meth, 'k) route
+val global : string -> (local, 'meth, 'k) route -> (global, 'meth, 'k) route
 
 (** {2 Generate links for routes} *)
 
 (** [html_href route args] generates a link that can be used in a [<a>]
     tag for a given [route] (using [args]). *)
-val html_href
-  :  ([ `Local | `Global ], Method.for_html_links, 'a) route
-  -> 'a args
-  -> string
+val html_href : ('scope, Method.for_html_links, 'a) route -> 'a args -> string
 
 (** [html_action route args] generates a link that can be used in a [<form action>]
     tag for a given [route] (using [args]). *)
-val html_action
-  :  ([ `Local | `Global ], Method.for_html_form, 'a) route
-  -> 'a args
-  -> string
+val html_action : ('scope, Method.for_html_form, 'a) route -> 'a args -> string
 
 (** [target route args] generates a link for a given [route] (using
     [args]) wihtout any constraints. *)
-val target : ([ `Local | `Global ], Method.t, 'a) route -> 'a args -> string
+val target : ('scope, Method.t, 'a) route -> 'a args -> string
 
 (** {1 Internal modules}
 
