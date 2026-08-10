@@ -91,5 +91,18 @@ val html_action : ('scope, Method.for_html_form, 'a) t -> 'a Args.t -> string
     [args]) wihtout any constraints. *)
 val target : ('scope, Method.t, 'a) t -> 'a Args.t -> string
 
+(** [to_list ?include_base_url route args] generate a link as a list
+    of string for the given [route] according to the given [args]. *)
+val to_list
+  :  ?include_base_url:bool
+  -> ('scope, Method.t, 'a) t
+  -> 'a Args.t
+  -> string list
+
+(** {1 Misc} *)
+
+(** [path route] returns the path of a given [route] *)
+val path : ('scope, _, 'k) t -> ('k, Void.t) Path.t
+
 (** [base_url route] returns the root of a global [route]. *)
 val base_url : (global, _, _) t -> string

@@ -59,6 +59,19 @@ let target : type scope. (scope, _, _) t -> _ =
     concat ~base_url @@ Path.to_list p args
 ;;
 
+let to_list : type scope. ?include_base_url:bool -> (scope, _, _) t -> _ =
+  fun ?(include_base_url = true) route args ->
+  match route with
+  | Local { path; _ } -> Path.to_list path args
+  | Global (base_url, { path; _ }) ->
+    let xs = Path.to_list path args in
+    if include_base_url then base_url :: xs else xs
+;;
+
+let path : type scope. (scope, _, _) t -> _ = function
+  | Local { path; _ } | Global (_, { path; _ }) -> path
+;;
+
 let base_url = function
   | Global (x, _) -> x
 ;;
