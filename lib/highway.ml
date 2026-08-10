@@ -8,8 +8,12 @@ module Args = Args
 module Hole = Hole
 module Pattern = Pattern
 module Path = Path
+module Method = Method
+
+(* Shortcuts and aliases *)
 
 type void = Void.t
+type meth = Method.t
 type 'a hole = 'a Hole.t
 
 type ('k, 'out) pattern = ('k, 'out) Pattern.t =
@@ -24,9 +28,27 @@ type ('k, 'out) path = ('k, 'out) Path.t =
   | [] : ('a, 'a) path
   | ( :: ) : ('a, 'b) pattern * ('b, 'c) path -> ('a, 'c) path
 
+type ('scope, 'meth, 'k) route = ('scope, 'meth, 'k) Route.t
+
+(* Patterns and Holes *)
+
 let s = Pattern.s
 let string = Pattern.string
 let int = Pattern.int
 let float = Pattern.float
 let char = Pattern.char
 let bool = Pattern.bool
+
+(* Routes *)
+
+let get = Route.get
+let post = Route.post
+let connect = Route.connect
+let delete = Route.delete
+let head = Route.head
+let options = Route.options
+let patch = Route.patch
+let put = Route.put
+let query = Route.query
+let trace = Route.trace
+let global = Route.global

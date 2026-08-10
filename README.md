@@ -24,8 +24,8 @@ community (and would not have been possible without them):
   complex web applications.
 - [Tyre](https://github.com/Drup/tyre): a very similar use of GADTs
   that served as inspiration.
-- [Format](https://ocaml.org/manual/5.5/api/Format.html): A router has
-  a lot in common with the OCaml Format module, which is very well
+- [Format](https://ocaml.org/manual/5.5/api/Format.html): _routers_
+  has a lot in common with the OCaml Format module, which is very well
   documented in the [following
   presentation](https://ocaml.org/conferences/ocaml/2013/slides/vaugon.pdf)
   and embodied by the incredible
