@@ -1,5 +1,4 @@
 (test
  (name highway_test)
  (package highway)
- (flags (:standard) -open Highway)
  (libraries alcotest highway))

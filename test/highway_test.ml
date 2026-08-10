@@ -3,4 +3,4 @@
 
    SPDX-License-Identifier: BSD-3-Clause *)
 
-let () = Alcotest.run "Highway main suite" []
+let () = Alcotest.run "Highway main suite" [ Path_projection_test.cases ]
