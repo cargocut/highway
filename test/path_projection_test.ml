@@ -3,6 +3,9 @@
 
    SPDX-License-Identifier: BSD-3-Clause *)
 
+(* A set of tests relating to the conversion of a Path to a list of
+   strings. *)
+
 open struct
   open Alcotest
 
@@ -105,6 +108,6 @@ open struct
 end
 
 let cases =
-  ( "Path"
+  ( "Path Projection"
   , [ projection_1; projection_2; projection_3; projection_4; projection_5 ] )
 ;;
