@@ -22,7 +22,7 @@ let simple ?middleware ~route handler =
   contextual ~context:(fun h -> h ()) ?middleware ~route handler
 ;;
 
-let dispatch ~given_method ~given_path ~fallback services request =
+let dispatch ~given_method ~given_path services fallback request =
   let rec resume = function
     | [] -> fallback request
     | Service { middleware; route; context; handler } :: others ->

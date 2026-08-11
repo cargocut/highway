@@ -31,6 +31,5 @@ val contextual
 val dispatch
   :  given_method:Method.t
   -> given_path:string list
-  -> fallback:('request, 'response) Handler.t
   -> ('request, 'response) t list
-  -> ('request, 'response) Handler.t
+  -> ('request, 'response) Middleware.t
