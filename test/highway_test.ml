@@ -9,5 +9,6 @@ let () =
     [ Path_projection_test.cases
     ; Path_handling_test.cases
     ; Route_projection_test.cases
+    ; Routing_test.cases
     ]
 ;;
