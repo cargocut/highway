@@ -10,6 +10,8 @@ module Pattern = Pattern
 module Path = Path
 module Method = Method
 module Route = Route
+module Handler = Handler
+module Middleware = Middleware
 
 (* Shortcuts and aliases *)
 
@@ -32,6 +34,8 @@ type ('k, 'out) path = ('k, 'out) Path.t =
 type ('scope, +'meth, 'k) route = ('scope, 'meth, 'k) Route.t
 type local = Route.local
 type global = Route.global
+type ('request, 'response) handler = ('request, 'response) Handler.t
+type ('request, 'response) middleware = ('request, 'response) Middleware.t
 
 (* Patterns and Holes *)
 

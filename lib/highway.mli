@@ -49,6 +49,12 @@ type local = Route.local
 (** Describes the global scope. *)
 type global = Route.global
 
+(** A type describing a request handler. *)
+type ('request, 'response) handler = ('request, 'response) Handler.t
+
+(** A type describing a middleware. *)
+type ('request, 'response) middleware = ('request, 'response) Middleware.t
+
 (** {1 Patterns}
 
     Pattern Construction (covered in the {!module:Pattern} module). *)
@@ -155,3 +161,5 @@ module Pattern = Pattern
 module Path = Path
 module Method = Method
 module Route = Route
+module Handler = Handler
+module Middleware = Middleware
