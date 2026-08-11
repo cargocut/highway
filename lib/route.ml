@@ -75,3 +75,9 @@ let path : type scope. (scope, _, _) t -> _ = function
 let base_url = function
   | Global (x, _) -> x
 ;;
+
+let get_args (Local { meth; path }) ~given_method ~given_path =
+  if Method.equal meth given_method
+  then Path.from_list path given_path
+  else None
+;;

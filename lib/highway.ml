@@ -12,6 +12,7 @@ module Method = Method
 module Route = Route
 module Handler = Handler
 module Middleware = Middleware
+module Service = Service
 
 (* Shortcuts and aliases *)
 
@@ -36,6 +37,7 @@ type local = Route.local
 type global = Route.global
 type ('request, 'response) handler = ('request, 'response) Handler.t
 type ('request, 'response) middleware = ('request, 'response) Middleware.t
+type ('request, 'response) service = ('request, 'response) Service.t
 
 (* Patterns and Holes *)
 

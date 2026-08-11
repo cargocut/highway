@@ -55,6 +55,9 @@ type ('request, 'response) handler = ('request, 'response) Handler.t
 (** A type describing a middleware. *)
 type ('request, 'response) middleware = ('request, 'response) Middleware.t
 
+(** A type describing a service. *)
+type ('request, 'response) service = ('request, 'response) Service.t
+
 (** {1 Patterns}
 
     Pattern Construction (covered in the {!module:Pattern} module). *)
@@ -149,6 +152,8 @@ val html_action : ('scope, Method.for_html_form, 'a) route -> 'a args -> string
     [args]) wihtout any constraints. *)
 val target : ('scope, Method.t, 'a) route -> 'a args -> string
 
+(** {2 Describing services} *)
+
 (** {1 Internal modules}
 
     Re-exporting internal modules (if functions are not re-exported in
@@ -163,3 +168,4 @@ module Method = Method
 module Route = Route
 module Handler = Handler
 module Middleware = Middleware
+module Service = Service

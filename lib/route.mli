@@ -106,3 +106,11 @@ val path : ('scope, _, 'k) t -> ('k, Void.t) Path.t
 
 (** [base_url route] returns the root of a global [route]. *)
 val base_url : (global, _, _) t -> string
+
+(** [get_args route ~given_method ~given_path] extracts the holes from
+    a given path if the specified method matches. *)
+val get_args
+  :  (local, Method.t, 'a) t
+  -> given_method:Method.t
+  -> given_path:string list
+  -> 'a Args.t option

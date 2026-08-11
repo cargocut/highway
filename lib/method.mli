@@ -41,3 +41,8 @@ type for_html_form = for_html
 
 (** Methods that can be used in HTML Links. *)
 type for_html_links = [ `GET ]
+
+(** {1 Misc} *)
+
+(** Equality between methods. *)
+val equal : t -> t -> bool
