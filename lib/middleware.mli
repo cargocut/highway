@@ -16,5 +16,5 @@ type ('request, 'response) t =
 (** {1 Utils} *)
 
 (** [fold some_middlware handler] reduce a list of middleware into
-    one, sequentially. *)
+    one, sequentially. It allows to collapse multiple middleware. *)
 val fold : ('request, 'response) t list -> ('request, 'response) t

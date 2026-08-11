@@ -55,6 +55,9 @@ type ('request, 'response) handler = ('request, 'response) Handler.t
 (** A type describing a middleware. *)
 type ('request, 'response) middleware = ('request, 'response) Middleware.t
 
+(** A type describing a context. *)
+type ('ctx, 'request, 'response) context = ('ctx, 'request, 'response) Context.t
+
 (** A type describing a service. *)
 type ('request, 'response) service = ('request, 'response) Service.t
 
@@ -66,7 +69,10 @@ type ('request, 'response) service = ('request, 'response) Service.t
     is very concise. *)
 val s : string -> ('a, 'a) pattern
 
-(** {2 Holes} *)
+(** {2 Holes}
+
+    The holes make it possible to create specific patterns for route
+    paths. *)
 
 (** Describes a pattern that is a hole capturing [string]. *)
 val string : (string -> 'a, 'a) pattern
@@ -152,7 +158,60 @@ val html_action : ('scope, Method.for_html_form, 'a) route -> 'a args -> string
     [args]) wihtout any constraints. *)
 val target : ('scope, Method.t, 'a) route -> 'a args -> string
 
-(** {2 Describing services} *)
+(** {1 Describing services}
+
+    The services allow you to describe controllers associated with
+    routes. *)
+
+(** [service ?middleware ~route handler] builds a service whose
+    context is [unit]. The controller function takes as arguments the
+    extracted parameters, the [args] from the [route], and the
+    context, in this case, [unit], a request, and returns a
+    response. *)
+val service
+  :  ?middleware:('request, 'response) middleware
+  -> route:(local, meth, 'args) route
+  -> ('args args -> unit -> ('request, 'response) handler)
+  -> ('request, 'response) service
+
+(** [service' ?middleware ~context ~route handler] builds a service
+    whose context is defined by the [contextual] parameter. The
+    controller function takes as arguments the extracted parameters,
+    the [args] from the [route], and the context, a request, and
+    returns a response. *)
+val service'
+  :  ?middleware:('request, 'response) middleware
+  -> context:('ctx, 'request, 'response) context
+  -> route:(local, meth, 'args) route
+  -> ('args args -> 'ctx -> ('request, 'response) handler)
+  -> ('request, 'response) service
+
+(** {2 Building contextes}
+
+    Context are used to provision services using values that can be
+    extracted from a request. *)
+
+(** [const x] establishes a context for a constant value. *)
+val const : 'a -> ('a, 'request, 'response) context
+
+(** [unit] describes the [unit] context, which is used for
+    {!val:service} services. *)
+val unit : (unit, 'request, 'response) context
+
+(** {1 Dispatch services}
+
+    Building a Router Based on a List of Services. *)
+
+(** [dispatch ~given_method ~given_path services fallback] is a
+    {!module:Middleware} which selects a candidate service from a list
+    (based on the specified path and method; therefore, the order
+    matters). If no candidate is found, the function executes the
+    fallback. *)
+val dispatch
+  :  given_method:meth
+  -> given_path:string list
+  -> ('request, 'response) service list
+  -> ('request, 'response) middleware
 
 (** {1 Internal modules}
 
@@ -168,4 +227,5 @@ module Method = Method
 module Route = Route
 module Handler = Handler
 module Middleware = Middleware
+module Context = Context
 module Service = Service

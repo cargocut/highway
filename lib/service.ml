@@ -7,10 +7,8 @@ type ('request, 'response) t =
   | Service :
       { middleware : ('request, 'response) Middleware.t option
       ; route : (Route.local, Method.t, 'args) Route.t
-      ; context :
-          ('context -> ('request, 'response) Handler.t)
-          -> ('request, 'response) Handler.t
-      ; handler : 'args Args.t -> 'context -> ('request, 'response) Handler.t
+      ; context : ('ctx, 'request, 'response) Context.t
+      ; handler : 'args Args.t -> 'ctx -> ('request, 'response) Handler.t
       }
       -> ('request, 'response) t
 
@@ -19,7 +17,7 @@ let contextual ?middleware ~context ~route handler =
 ;;
 
 let simple ?middleware ~route handler =
-  contextual ~context:(fun h -> h ()) ?middleware ~route handler
+  contextual ~context:Context.unit ?middleware ~route handler
 ;;
 
 let dispatch ~given_method ~given_path services fallback request =

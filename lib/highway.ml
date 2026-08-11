@@ -12,6 +12,7 @@ module Method = Method
 module Route = Route
 module Handler = Handler
 module Middleware = Middleware
+module Context = Context
 module Service = Service
 
 (* Shortcuts and aliases *)
@@ -37,6 +38,7 @@ type local = Route.local
 type global = Route.global
 type ('request, 'response) handler = ('request, 'response) Handler.t
 type ('request, 'response) middleware = ('request, 'response) Middleware.t
+type ('ctx, 'request, 'response) context = ('ctx, 'request, 'response) Context.t
 type ('request, 'response) service = ('request, 'response) Service.t
 
 (* Patterns and Holes *)
@@ -67,3 +69,14 @@ let global = Route.global
 let html_href = Route.html_href
 let html_action = Route.html_action
 let target = Route.target
+
+(* Context *)
+
+let unit = Context.unit
+let const = Context.const
+
+(* Services *)
+
+let service = Service.simple
+let service' = Service.contextual
+let dispatch = Service.dispatch
