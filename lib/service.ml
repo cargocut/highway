@@ -7,7 +7,7 @@ type ('request, 'response) t =
   | Service :
       { middleware : ('request, 'response) Middleware.t option
       ; route : (Route.local, Method.t, 'args) Route.t
-      ; on_request : 'request -> ('query_params, unit) result
+      ; extractor : ('request, 'query_params) Extractor.t
       ; context : ('ctx, 'request, 'response) Context.t
       ; handler :
           'args Args.t
@@ -17,17 +17,17 @@ type ('request, 'response) t =
       }
       -> ('request, 'response) t
 
-let make ?middleware ~on_request ~context ~route handler =
-  Service { middleware; route; context; handler; on_request }
+let make ?middleware ~extractor ~context ~route handler =
+  Service { middleware; route; context; handler; extractor }
 ;;
 
 let dispatch ~given_method ~given_path services fallback request =
   let rec resume = function
     | [] -> fallback request
-    | Service { middleware; route; context; handler; on_request } :: others ->
+    | Service { middleware; route; context; handler; extractor } :: others ->
       (match Route.get_args ~given_method ~given_path route with
        | Some args ->
-         (match on_request request with
+         (match extractor request with
           | Ok s ->
             let f req = context (handler args s) req in
             (match middleware with

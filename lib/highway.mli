@@ -57,8 +57,7 @@ type ('request, 'response) middleware = ('request, 'response) Middleware.t
 
 (** A type describing an extraction over the request during the
     routing. *)
-type ('request, 'query_params) request_handler =
-  ('request, 'query_params) Request_handler.t
+type ('request, 'query_params) extractor = ('request, 'query_params) Extractor.t
 
 (** A type describing a context. *)
 type ('ctx, 'request, 'response) context = ('ctx, 'request, 'response) Context.t
@@ -177,13 +176,13 @@ val target : ('scope, Method.t, 'a) route -> 'a args -> string
     representation. *)
 val service
   :  ?middleware:('request, 'response) middleware
-  -> on_request:('request -> ('query_params, unit) result)
+  -> extractor:('request, 'query_params) extractor
   -> context:('ctx, 'request, 'response) context
   -> route:(local, meth, 'args) route
   -> ('args args -> 'query_params -> 'ctx -> ('request, 'response) handler)
   -> ('request, 'response) service
 
-(** {2 Building contextes and request handler}
+(** {2 Context}
 
     Context are used to provision services using values that can be
     extracted from a request. *)
@@ -195,18 +194,25 @@ val const : 'a -> ('a, 'request, 'response) context
     {!val:service} services. *)
 val unit : (unit, 'request, 'response) context
 
-(** [no_request_handler] discard the obersvation of the request during
-    the routing. *)
-val no_request_handler : ('request, unit) request_handler
+(** {2 Extractor}
 
-(** [query_params get_from_request check] is a request handler that
+    An extractor allows you to add data extracted from the request
+    during routing—for example, to validate query parameters. Note
+    that if more granular control is required, it is better to use the
+    handler body. *)
+
+(** [no_extraction] discard the obersvation of the request during
+    the routing. *)
+val no_extraction : ('request, unit) extractor
+
+(** [extract_query_params get_from_request check] is a request handler that
     use {{:https://ocaml.org/p/pidgin/latest} Pidgin} for validating
     query params extracted from the [get_from_request] function. See
-    {!module:Request_handler} for more information. *)
-val query_params
+    {!module:Extractor} for more information. *)
+val extract_query_params
   :  ('request -> (string * string) list)
   -> 'query_params Pidgin.Check.t
-  -> ('request, 'query_params) request_handler
+  -> ('request, 'query_params) extractor
 
 (** {1 Dispatch services}
 
@@ -237,6 +243,6 @@ module Method = Method
 module Route = Route
 module Handler = Handler
 module Middleware = Middleware
-module Request_handler = Request_handler
+module Extractor = Extractor
 module Context = Context
 module Service = Service

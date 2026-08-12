@@ -24,12 +24,12 @@ type ('request, 'response) t
     service whose context is defined by the [context] parameter. The
     controller function takes as arguments the extracted parameters,
     the [args] from the [route], and the context, a request, and
-    returns a response. The function [on_request] can be used to
+    returns a response. The function [extractor] can be used to
     validate the request, extracting query parameters in an arbitrary
     representation. *)
 val make
   :  ?middleware:('request, 'response) Middleware.t
-  -> on_request:('request -> ('query_params, unit) result)
+  -> extractor:('request, 'query_params) Extractor.t
   -> context:('ctx, 'request, 'response) Context.t
   -> route:(Route.local, Method.t, 'args) Route.t
   -> ('args Args.t -> 'query_params -> 'ctx -> ('request, 'response) Handler.t)

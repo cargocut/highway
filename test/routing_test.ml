@@ -23,7 +23,7 @@ open struct
   module Services = struct
     let home =
       service
-        ~on_request:no_request_handler
+        ~extractor:no_extraction
         ~context:unit
         ~route:Routes.home
         (fun [] () () _req -> "Welcome to The home of my website")
@@ -31,7 +31,7 @@ open struct
 
     let hello_auth =
       service
-        ~on_request:no_request_handler
+        ~extractor:no_extraction
         ~context:need_user
         ~route:Routes.hello_auth
         (fun [] () username _req -> "Welcome authorized user, " ^ username)
@@ -39,7 +39,7 @@ open struct
 
     let hello =
       service
-        ~on_request:no_request_handler
+        ~extractor:no_extraction
         ~context:unit
         ~route:Routes.hello
         (fun [ name ] () () _req -> "Hello, " ^ name)
@@ -47,7 +47,7 @@ open struct
 
     let login =
       service
-        ~on_request:no_request_handler
+        ~extractor:no_extraction
         ~context:user_rejected
         ~route:Routes.login
         (fun [ code ] () () req ->
@@ -60,7 +60,7 @@ open struct
 
     let logout =
       service
-        ~on_request:no_request_handler
+        ~extractor:no_extraction
         ~context:need_user
         ~route:Routes.logout
         (fun [] () username req ->

@@ -3,10 +3,12 @@
 
    SPDX-License-Identifier: BSD-3-Clause *)
 
-(** A Request Handler is a function that extracts arbitrary
-    information from the [request]. Usually, these are query
-    parameters. The extraction may succeed: [Ok 'query_params] or
-    fail: [Error ()]. *)
+(** An extractor is a function that extracts arbitrary information
+    from the [request]. Usually, these are query parameters. The
+    extraction may succeed: [Ok 'query_params] or fail: [Error ()].
+    Since the goal of an extractor is mostly to complete the routing,
+    error can be no qualified since it pass the hand to the next
+    route. *)
 
 (** {1 Types} *)
 
