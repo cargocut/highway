@@ -13,3 +13,4 @@ let int = Hole Hole.int
 let char = Hole Hole.char
 let float = Hole Hole.float
 let bool = Hole Hole.bool
+let opt ?empty hole = Hole (Hole.opt ?empty hole ())

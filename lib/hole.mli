@@ -51,3 +51,7 @@ val char : char t
 
 (** A hole that catches [bool]. *)
 val bool : bool t
+
+(** A hole that catches [optional value] using [empty] as a neutral
+    representation. *)
+val opt : ?empty:string -> 'a t -> unit -> 'a option t

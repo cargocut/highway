@@ -31,6 +31,9 @@ let make_simple ?middleware ~route handler =
 ;;
 
 let dispatch ~given_method ~given_path services fallback request =
+  (* TODO: The following implementation is a bit naive, even though it
+     may be good enough for now; however, we might want to improve it
+     by implementing a Trie. *)
   let rec resume = function
     | [] -> fallback request
     | Service { middleware; route; context; handler; extractor } :: others ->

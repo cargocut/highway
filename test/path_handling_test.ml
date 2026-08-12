@@ -59,6 +59,99 @@ open struct
       | Some [ "bar"; 42; true; 'c'; 3.14; "fin"; 1; 2; 3 ] -> ()
       | _ -> fail "Invalid Path")
   ;;
+
+  let handling_4 =
+    test_case "Complicated pattern" `Quick (fun () ->
+      let path =
+        let open Highway in
+        let open Path in
+        [ s "foo"; string; s "baz" ]
+        ++ [ int; bool; char; float; string; s "foobar" ]
+        ++ [ int; int; int; opt Hole.int ]
+      and input =
+        List.
+          [ "foo"
+          ; "bar"
+          ; "baz"
+          ; "42"
+          ; "true"
+          ; "c"
+          ; "3.14"
+          ; "fin"
+          ; "foobar"
+          ; "1"
+          ; "2"
+          ; "3"
+          ; "10"
+          ]
+      in
+      match Highway.Path.from_list path input with
+      | Some [ "bar"; 42; true; 'c'; 3.14; "fin"; 1; 2; 3; Some 10 ] -> ()
+      | _ -> fail "Invalid Path")
+  ;;
+
+  let handling_5 =
+    test_case "Complicated pattern" `Quick (fun () ->
+      let path =
+        let open Highway in
+        let open Path in
+        [ s "foo"; string; s "baz" ]
+        ++ [ int; bool; char; float; string; s "foobar" ]
+        ++ [ int; int; int; opt Hole.int ]
+      and input =
+        List.
+          [ "foo"
+          ; "bar"
+          ; "baz"
+          ; "42"
+          ; "true"
+          ; "c"
+          ; "3.14"
+          ; "fin"
+          ; "foobar"
+          ; "1"
+          ; "2"
+          ; "3"
+          ; ""
+          ]
+      in
+      match Highway.Path.from_list path input with
+      | Some [ "bar"; 42; true; 'c'; 3.14; "fin"; 1; 2; 3; None ] -> ()
+      | _ -> fail "Invalid Path")
+  ;;
+
+  let handling_6 =
+    test_case "Complicated pattern" `Quick (fun () ->
+      let path =
+        let open Highway in
+        let open Path in
+        [ s "foo"; string; s "baz" ]
+        ++ [ int; bool; char; float; string; s "foobar" ]
+        ++ [ int; int; int; opt ~empty:"<none>" Hole.int ]
+      and input =
+        List.
+          [ "foo"
+          ; "bar"
+          ; "baz"
+          ; "42"
+          ; "true"
+          ; "c"
+          ; "3.14"
+          ; "fin"
+          ; "foobar"
+          ; "1"
+          ; "2"
+          ; "3"
+          ; "<none>"
+          ]
+      in
+      match Highway.Path.from_list path input with
+      | Some [ "bar"; 42; true; 'c'; 3.14; "fin"; 1; 2; 3; None ] -> ()
+      | _ -> fail "Invalid Path")
+  ;;
 end
 
-let cases = "Path Handling", [ handling_1; handling_2; handling_3 ]
+let cases =
+  ( "Path Handling"
+  , [ handling_1; handling_2; handling_3; handling_4; handling_5; handling_6 ] )
+;;

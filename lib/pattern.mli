@@ -42,3 +42,6 @@ val char : (char -> 'a, 'a) t
 
 (** Describes a pattern that is a hole capturing [bool]. *)
 val bool : (bool -> 'a, 'a) t
+
+(** Describes a potentially empty hole. *)
+val opt : ?empty:string -> 'a Hole.t -> ('a option -> 'b, 'b) t

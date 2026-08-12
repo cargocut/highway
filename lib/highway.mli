@@ -93,6 +93,9 @@ val char : (char -> 'a, 'a) pattern
 (** Describes a pattern that is a hole capturing [bool]. *)
 val bool : (bool -> 'a, 'a) pattern
 
+(** Describes a potentially empty hole. *)
+val opt : ?empty:string -> 'a Hole.t -> ('a option -> 'b, 'b) pattern
+
 (** {1 Routes}
 
     Routes can be local, to describe resources within the application,

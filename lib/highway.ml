@@ -51,6 +51,7 @@ let int = Pattern.int
 let float = Pattern.float
 let char = Pattern.char
 let bool = Pattern.bool
+let opt = Pattern.opt
 
 (* Routes *)
 

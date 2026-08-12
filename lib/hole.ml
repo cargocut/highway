@@ -37,3 +37,16 @@ let bool =
       | "false" -> Some false
       | _ -> None)
 ;;
+
+let opt ?(empty = "") { to_string; from_string } () =
+  { to_string =
+      (function
+        | None -> empty
+        | Some x -> to_string x)
+  ; from_string =
+      (fun x ->
+        if String.equal x empty
+        then Some None
+        else Option.map (fun x -> Some x) (from_string x))
+  }
+;;
