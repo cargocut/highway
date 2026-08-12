@@ -35,6 +35,14 @@ val make
   -> ('args Args.t -> 'query_params -> 'ctx -> ('request, 'response) Handler.t)
   -> ('request, 'response) t
 
+(** [make_simple] is like [make] but without extractor and without
+    context. *)
+val make_simple
+  :  ?middleware:('request, 'response) Middleware.t
+  -> route:(Route.local, Method.t, 'args) Route.t
+  -> ('args Args.t -> ('request, 'response) Handler.t)
+  -> ('request, 'response) t
+
 (** {1 Routing services}
 
     The routing procedure allows you to select a candidate service

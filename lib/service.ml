@@ -21,6 +21,15 @@ let make ?middleware ~extractor ~context ~route handler =
   Service { middleware; route; context; handler; extractor }
 ;;
 
+let make_simple ?middleware ~route handler =
+  make
+    ?middleware
+    ~extractor:Extractor.nop
+    ~context:Context.unit
+    ~route
+    (fun args () () req -> handler args req)
+;;
+
 let dispatch ~given_method ~given_path services fallback request =
   let rec resume = function
     | [] -> fallback request
