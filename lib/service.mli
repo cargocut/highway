@@ -20,23 +20,12 @@ type ('request, 'response) t
     provider (to add additional data), and a function that is executed
     when a route matches a request. *)
 
-(** [simple ?middleware ~route handler] builds a service whose context
-    is [unit]. The controller function takes as arguments the
-    extracted parameters, the [args] from the [route], and the
-    context, in this case, [unit], a request, and returns a
-    response. *)
-val simple
-  :  ?middleware:('request, 'response) Middleware.t
-  -> route:(Route.local, Method.t, 'args) Route.t
-  -> ('args Args.t -> unit -> ('request, 'response) Handler.t)
-  -> ('request, 'response) t
-
 (** [contextual ?middleware ~context ~route handler] builds a service
     whose context is defined by the [contextual] parameter. The
     controller function takes as arguments the extracted parameters,
     the [args] from the [route], and the context, a request, and
     returns a response. *)
-val contextual
+val make
   :  ?middleware:('request, 'response) Middleware.t
   -> context:('ctx, 'request, 'response) Context.t
   -> route:(Route.local, Method.t, 'args) Route.t

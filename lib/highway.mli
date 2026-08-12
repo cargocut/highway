@@ -163,23 +163,12 @@ val target : ('scope, Method.t, 'a) route -> 'a args -> string
     The services allow you to describe controllers associated with
     routes. *)
 
-(** [service ?middleware ~route handler] builds a service whose
-    context is [unit]. The controller function takes as arguments the
-    extracted parameters, the [args] from the [route], and the
-    context, in this case, [unit], a request, and returns a
-    response. *)
-val service
-  :  ?middleware:('request, 'response) middleware
-  -> route:(local, meth, 'args) route
-  -> ('args args -> unit -> ('request, 'response) handler)
-  -> ('request, 'response) service
-
-(** [service' ?middleware ~context ~route handler] builds a service
+(** [service ?middleware ~context ~route handler] builds a service
     whose context is defined by the [contextual] parameter. The
     controller function takes as arguments the extracted parameters,
     the [args] from the [route], and the context, a request, and
     returns a response. *)
-val service'
+val service
   :  ?middleware:('request, 'response) middleware
   -> context:('ctx, 'request, 'response) context
   -> route:(local, meth, 'args) route

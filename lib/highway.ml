@@ -77,6 +77,5 @@ let const = Context.const
 
 (* Services *)
 
-let service = Service.simple
-let service' = Service.contextual
+let service = Service.make
 let dispatch = Service.dispatch

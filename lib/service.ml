@@ -12,12 +12,8 @@ type ('request, 'response) t =
       }
       -> ('request, 'response) t
 
-let contextual ?middleware ~context ~route handler =
+let make ?middleware ~context ~route handler =
   Service { middleware; route; context; handler }
-;;
-
-let simple ?middleware ~route handler =
-  contextual ~context:Context.unit ?middleware ~route handler
 ;;
 
 let dispatch ~given_method ~given_path services fallback request =
