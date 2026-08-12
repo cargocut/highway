@@ -55,6 +55,11 @@ type ('request, 'response) handler = ('request, 'response) Handler.t
 (** A type describing a middleware. *)
 type ('request, 'response) middleware = ('request, 'response) Middleware.t
 
+(** A type describing an extraction over the request during the
+    routing. *)
+type ('request, 'query_params) request_handler =
+  ('request, 'query_params) Request_handler.t
+
 (** A type describing a context. *)
 type ('ctx, 'request, 'response) context = ('ctx, 'request, 'response) Context.t
 
@@ -167,15 +172,18 @@ val target : ('scope, Method.t, 'a) route -> 'a args -> string
     whose context is defined by the [contextual] parameter. The
     controller function takes as arguments the extracted parameters,
     the [args] from the [route], and the context, a request, and
-    returns a response. *)
+    returns a response. The function [on_request] can be used to
+    validate the request, extracting query parameters in an arbitrary
+    representation. *)
 val service
   :  ?middleware:('request, 'response) middleware
+  -> on_request:('request -> ('query_params, unit) result)
   -> context:('ctx, 'request, 'response) context
   -> route:(local, meth, 'args) route
-  -> ('args args -> 'ctx -> ('request, 'response) handler)
+  -> ('args args -> 'query_params -> 'ctx -> ('request, 'response) handler)
   -> ('request, 'response) service
 
-(** {2 Building contextes}
+(** {2 Building contextes and request handler}
 
     Context are used to provision services using values that can be
     extracted from a request. *)
@@ -186,6 +194,19 @@ val const : 'a -> ('a, 'request, 'response) context
 (** [unit] describes the [unit] context, which is used for
     {!val:service} services. *)
 val unit : (unit, 'request, 'response) context
+
+(** [no_request_handler] discard the obersvation of the request during
+    the routing. *)
+val no_request_handler : ('request, unit) request_handler
+
+(** [query_params get_from_request check] is a request handler that
+    use {{:https://ocaml.org/p/pidgin/latest} Pidgin} for validating
+    query params extracted from the [get_from_request] function. See
+    {!module:Request_handler} for more information. *)
+val query_params
+  :  ('request -> (string * string) list)
+  -> 'query_params Pidgin.Check.t
+  -> ('request, 'query_params) request_handler
 
 (** {1 Dispatch services}
 
@@ -216,5 +237,6 @@ module Method = Method
 module Route = Route
 module Handler = Handler
 module Middleware = Middleware
+module Request_handler = Request_handler
 module Context = Context
 module Service = Service

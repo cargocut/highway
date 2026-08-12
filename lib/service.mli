@@ -20,16 +20,19 @@ type ('request, 'response) t
     provider (to add additional data), and a function that is executed
     when a route matches a request. *)
 
-(** [contextual ?middleware ~context ~route handler] builds a service
-    whose context is defined by the [contextual] parameter. The
+(** [make ?middleware ~on_query ~context ~route handler] builds a
+    service whose context is defined by the [context] parameter. The
     controller function takes as arguments the extracted parameters,
     the [args] from the [route], and the context, a request, and
-    returns a response. *)
+    returns a response. The function [on_request] can be used to
+    validate the request, extracting query parameters in an arbitrary
+    representation. *)
 val make
   :  ?middleware:('request, 'response) Middleware.t
+  -> on_request:('request -> ('query_params, unit) result)
   -> context:('ctx, 'request, 'response) Context.t
   -> route:(Route.local, Method.t, 'args) Route.t
-  -> ('args Args.t -> 'ctx -> ('request, 'response) Handler.t)
+  -> ('args Args.t -> 'query_params -> 'ctx -> ('request, 'response) Handler.t)
   -> ('request, 'response) t
 
 (** {1 Routing services}

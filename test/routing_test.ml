@@ -22,35 +22,50 @@ open struct
 
   module Services = struct
     let home =
-      service ~context:unit ~route:Routes.home (fun [] () _req ->
-        "Welcome to The home of my website")
+      service
+        ~on_request:no_request_handler
+        ~context:unit
+        ~route:Routes.home
+        (fun [] () () _req -> "Welcome to The home of my website")
     ;;
 
     let hello_auth =
       service
+        ~on_request:no_request_handler
         ~context:need_user
         ~route:Routes.hello_auth
-        (fun [] username _req -> "Welcome authorized user, " ^ username)
+        (fun [] () username _req -> "Welcome authorized user, " ^ username)
     ;;
 
     let hello =
-      service ~context:unit ~route:Routes.hello (fun [ name ] () _req ->
-        "Hello, " ^ name)
+      service
+        ~on_request:no_request_handler
+        ~context:unit
+        ~route:Routes.hello
+        (fun [ name ] () () _req -> "Hello, " ^ name)
     ;;
 
     let login =
-      service ~context:user_rejected ~route:Routes.login (fun [ code ] () req ->
-        if Int.equal code 12345678
-        then (
-          req := true;
-          "You are connected")
-        else error 401 req)
+      service
+        ~on_request:no_request_handler
+        ~context:user_rejected
+        ~route:Routes.login
+        (fun [ code ] () () req ->
+           if Int.equal code 12345678
+           then (
+             req := true;
+             "You are connected")
+           else error 401 req)
     ;;
 
     let logout =
-      service ~context:need_user ~route:Routes.logout (fun [] username req ->
-        req := false;
-        "Bye bye " ^ username)
+      service
+        ~on_request:no_request_handler
+        ~context:need_user
+        ~route:Routes.logout
+        (fun [] () username req ->
+           req := false;
+           "Bye bye " ^ username)
     ;;
 
     let dispatch given_method given_path =

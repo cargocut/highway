@@ -1,3 +1,4 @@
 (library
  (name highway)
- (public_name highway))
+ (public_name highway)
+ (libraries pidgin))

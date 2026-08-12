@@ -12,6 +12,7 @@ module Method = Method
 module Route = Route
 module Handler = Handler
 module Middleware = Middleware
+module Request_handler = Request_handler
 module Context = Context
 module Service = Service
 
@@ -39,6 +40,10 @@ type global = Route.global
 type ('request, 'response) handler = ('request, 'response) Handler.t
 type ('request, 'response) middleware = ('request, 'response) Middleware.t
 type ('ctx, 'request, 'response) context = ('ctx, 'request, 'response) Context.t
+
+type ('request, 'query_params) request_handler =
+  ('request, 'query_params) Request_handler.t
+
 type ('request, 'response) service = ('request, 'response) Service.t
 
 (* Patterns and Holes *)
@@ -70,10 +75,12 @@ let html_href = Route.html_href
 let html_action = Route.html_action
 let target = Route.target
 
-(* Context *)
+(* Context & request handlers *)
 
 let unit = Context.unit
 let const = Context.const
+let no_request_handler = Request_handler.nop
+let query_params = Request_handler.extract
 
 (* Services *)
 
