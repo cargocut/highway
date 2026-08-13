@@ -24,22 +24,19 @@ type ('request, 'response) t
     service whose context is defined by the [context] parameter. The
     controller function takes as arguments the extracted parameters,
     the [args] from the [route], and the context, a request, and
-    returns a response. The function [extractor] can be used to
-    validate the request, extracting query parameters in an arbitrary
-    representation. *)
+    returns a response. *)
 val make
   :  ?middleware:('request, 'response) Middleware.t
-  -> extractor:('request, 'query_params) Extractor.t
   -> context:('ctx, 'request, 'response) Context.t
-  -> route:(Route.local, Method.t, 'args) Route.t
-  -> ('args Args.t -> 'query_params -> 'ctx -> ('request, 'response) Handler.t)
+  -> route:(Route.local, Method.t, 'cstr, 'param_ty, 'args) Route.t
+  -> ('args Args.t -> 'param_ty -> 'ctx -> ('request, 'response) Handler.t)
   -> ('request, 'response) t
 
 (** [make_simple] is like [make] but without extractor and without
     context. *)
 val make_simple
   :  ?middleware:('request, 'response) Middleware.t
-  -> route:(Route.local, Method.t, 'args) Route.t
+  -> route:(Route.local, Method.t, Param.something, unit, 'args) Route.t
   -> ('args Args.t -> ('request, 'response) Handler.t)
   -> ('request, 'response) t
 
@@ -49,7 +46,7 @@ val make_simple
     from a list based on a method and a path (represented as a list of
     strings). This makes it possible to build generic routers. *)
 
-(** [dispatch ~given_method ~given_path services fallback] is a
+(** [dispatch ~given_method ~given_path ~given_query_params services fallback] is a
     {!module:Middleware} which selects a candidate service from a list
     (based on the specified path and method; therefore, the order
     matters). If no candidate is found, the function executes the
@@ -57,5 +54,6 @@ val make_simple
 val dispatch
   :  given_method:Method.t
   -> given_path:string list
+  -> given_query_params:(string * string) list
   -> ('request, 'response) t list
   -> ('request, 'response) Middleware.t

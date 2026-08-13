@@ -257,6 +257,14 @@ open struct
         expected
         computed)
   ;;
+
+  let from_query8 =
+    test_case "from_query" `Quick (fun () ->
+      let subject = [] in
+      let expected = Some ()
+      and computed = Highway.Param.from_query Highway.Param.lax subject in
+      check (option unit) "should be equal" expected computed)
+  ;;
 end
 
 let cases =
@@ -273,5 +281,6 @@ let cases =
     ; from_query5
     ; from_query6
     ; from_query7
+    ; from_query8
     ] )
 ;;

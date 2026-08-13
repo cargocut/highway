@@ -110,9 +110,7 @@ let to_pidgin list =
     , match v with
       | One s -> to_pidgin_str s
       | More xs -> Pidgin.Repr.list_of to_pidgin_str (List.rev xs) ))
-  |> function
-  | [] -> Pidgin.Repr.null ()
-  | xs -> Pidgin.Repr.record xs
+  |> Pidgin.Repr.record
 ;;
 
 let from_query : type cstr a. (cstr, a) t -> (string * string) list -> a option =
@@ -121,8 +119,7 @@ let from_query : type cstr a. (cstr, a) t -> (string * string) list -> a option 
   | Nothing, [] -> Some ()
   | Nothing, _ -> None
   | Something { from_query; _ }, xs ->
-    let pidgin = to_pidgin xs in
-    Pidgin.Check.record from_query pidgin |> Result.to_option
+    xs |> to_pidgin |> Pidgin.Check.record from_query |> Result.to_option
 ;;
 
 let to_query_params : type cstr a. (cstr, a) t -> a -> (string * string) list =
@@ -132,9 +129,7 @@ let to_query_params : type cstr a. (cstr, a) t -> a -> (string * string) list =
   | Something { to_query; _ } -> to_query subject
 ;;
 
-let to_query_string : type cstr a. (cstr, a) t -> a -> string option =
-  fun device subject ->
-  match to_query_params device subject with
+let concat_query_params = function
   | [] -> None
   | (k, v) :: xs ->
     Some
@@ -142,4 +137,8 @@ let to_query_string : type cstr a. (cstr, a) t -> a -> string option =
          (fun result (k, v) -> result ^ "&" ^ k ^ "=" ^ v)
          (k ^ "=" ^ v)
          xs)
+;;
+
+let to_query_string : type cstr a. (cstr, a) t -> a -> string option =
+  fun device subject -> subject |> to_query_params device |> concat_query_params
 ;;

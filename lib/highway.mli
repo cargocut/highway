@@ -23,7 +23,6 @@ module Method = Method
 module Route = Route
 module Handler = Handler
 module Middleware = Middleware
-module Extractor = Extractor
 module Context = Context
 module Param = Param
 module Service = Service

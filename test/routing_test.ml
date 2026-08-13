@@ -16,17 +16,16 @@ open struct
     open Route
     open Pattern
 
-    let home = get []
-    let hello_auth = get [ s "hello" ]
-    let hello = get [ s "hello"; string ]
-    let login = post [ s "login"; int ]
-    let logout = post [ s "logout" ]
+    let home = get [] Param.lax
+    let hello_auth = get [ s "hello" ] Param.lax
+    let hello = get [ s "hello"; string ] Param.lax
+    let login = post [ s "login"; int ] Param.lax
+    let logout = post [ s "logout" ] Param.lax
   end
 
   module Services = struct
     let home =
       Service.make
-        ~extractor:Extractor.nop
         ~context:Context.unit
         ~route:Routes.home
         (fun [] () () _req -> "Welcome to The home of my website")
@@ -34,7 +33,6 @@ open struct
 
     let hello_auth =
       Service.make
-        ~extractor:Extractor.nop
         ~context:need_user
         ~route:Routes.hello_auth
         (fun [] () username _req -> "Welcome authorized user, " ^ username)
@@ -42,7 +40,6 @@ open struct
 
     let hello =
       Service.make
-        ~extractor:Extractor.nop
         ~context:Context.unit
         ~route:Routes.hello
         (fun [ name ] () () _req -> "Hello, " ^ name)
@@ -50,7 +47,6 @@ open struct
 
     let login =
       Service.make
-        ~extractor:Extractor.nop
         ~context:user_rejected
         ~route:Routes.login
         (fun [ code ] () () req ->
@@ -63,7 +59,6 @@ open struct
 
     let logout =
       Service.make
-        ~extractor:Extractor.nop
         ~context:need_user
         ~route:Routes.logout
         (fun [] () username req ->
@@ -71,10 +66,11 @@ open struct
            "Bye bye " ^ username)
     ;;
 
-    let dispatch given_method given_path =
+    let dispatch ?(given_query_params = []) given_method given_path =
       Service.dispatch
         ~given_method
         ~given_path
+        ~given_query_params
         [ home; hello_auth; hello; login; logout ]
         (error 404)
     ;;

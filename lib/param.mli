@@ -93,3 +93,6 @@ include module type of Infix
 (** [to_pidgin] Converts a list of query parameter mappings into a
     valid Pidgin object.*)
 val to_pidgin : (string * string) list -> Pidgin.Repr.t
+
+(** [concat_query_params list] normalize a query param string. *)
+val concat_query_params : (string * string) list -> string option
