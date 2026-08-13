@@ -48,6 +48,12 @@ val define
   -> to_query:('ty -> (string * string) list)
   -> (something, 'ty) t
 
+(** [make (module P)] lift a module into a typed parameter. *)
+val make : (module Sigs.AS_PARAM with type t = 'a) -> (something, 'a) t
+
+(** [invmap device f g] map from [a] to [b]. *)
+val invmap : (something, 'a) t -> ('a -> 'b) -> ('b -> 'a) -> (something, 'b) t
+
 (** {1 Validate params} *)
 
 (** [from_query param assoc_list] try to validate and extract the

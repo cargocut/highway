@@ -14,6 +14,7 @@
     the main module). *)
 
 module Void = Void
+module Sigs = Sigs
 module Args = Args
 module Hole = Hole
 module Pattern = Pattern

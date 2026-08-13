@@ -17,6 +17,12 @@ type ('constraints, 'ty) t =
   | Nothing : (nothing, unit) t
   | Something : 'a device -> (something, 'a) t
 
+let invmap (Something a) from_a to_a =
+  let from_query x = x |> a.from_query |> Result.map from_a
+  and to_query x = x |> to_a |> a.to_query in
+  Something { from_query; to_query }
+;;
+
 module Infix = struct
   let ( & ) (Something a) (Something b) =
     let from_query fields =
@@ -48,6 +54,10 @@ include Infix
 let nop = Nothing
 let define ~from_query ~to_query = Something (device ~from_query ~to_query)
 let lax = define ~from_query:(fun _ -> Ok ()) ~to_query:(fun () -> [])
+
+let make (type a) (module T : Sigs.AS_PARAM with type t = a) =
+  define ~from_query:T.check_param ~to_query:T.render_param
+;;
 
 module M = Map.Make (String)
 
@@ -99,7 +109,7 @@ let to_pidgin list =
     ( k
     , match v with
       | One s -> to_pidgin_str s
-      | More xs -> Pidgin.Repr.list_of to_pidgin_str xs ))
+      | More xs -> Pidgin.Repr.list_of to_pidgin_str (List.rev xs) ))
   |> function
   | [] -> Pidgin.Repr.null ()
   | xs -> Pidgin.Repr.record xs

@@ -4,6 +4,7 @@
    SPDX-License-Identifier: BSD-3-Clause *)
 
 module Void = Void
+module Sigs = Sigs
 module Args = Args
 module Hole = Hole
 module Pattern = Pattern
