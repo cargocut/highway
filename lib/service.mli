@@ -20,13 +20,19 @@ type ('request, 'response) t
     provider (to add additional data), and a function that is executed
     when a route matches a request. *)
 
-(** [make ?middleware ~on_query ~context ~route handler] builds a
-    service whose context is defined by the [context] parameter. The
-    controller function takes as arguments the extracted parameters,
-    the [args] from the [route], and the context, a request, and
-    returns a response. *)
+(** [make ?middleware ?precondition ?postcondition ~context ~route handler]
+    builds a service whose context is defined by the
+    [context] parameter. The controller function takes as arguments
+    the extracted parameters, the [args] from the [route], and the
+    context, a request, and returns a response.
+
+    - [precondition] is a condition performed before the routing.
+    - [postcondition] is a condition performed after getting [args] and
+      [param] (before the middleware application). *)
 val make
   :  ?middleware:('request, 'response) Middleware.t
+  -> ?precondition:('request -> bool)
+  -> ?postcondition:('args Args.t -> 'param_ty -> 'request -> bool)
   -> context:('ctx, 'request, 'response) Context.t
   -> route:(Route.local, Method.t, 'cstr, 'param_ty, 'args) Route.t
   -> ('args Args.t -> 'param_ty -> 'ctx -> ('request, 'response) Handler.t)
@@ -46,9 +52,9 @@ val make_simple
     from a list based on a method and a path (represented as a list of
     strings). This makes it possible to build generic routers. *)
 
-(** [dispatch ~given_method ~given_path ~given_query_params services fallback] is a
-    {!module:Middleware} which selects a candidate service from a list
-    (based on the specified path and method; therefore, the order
+(** [dispatch ~given_method ~given_path ~given_query_params services fallback]
+    is a {!module:Middleware} which selects a candidate service from a
+    list (based on the specified path and method; therefore, the order
     matters). If no candidate is found, the function executes the
     fallback. *)
 val dispatch

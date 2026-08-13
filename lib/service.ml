@@ -6,15 +6,24 @@
 type ('request, 'response) t =
   | Service :
       { middleware : ('request, 'response) Middleware.t option
+      ; precondition : 'request -> bool
       ; route : (Route.local, Method.t, 'cstr, 'param_ty, 'args) Route.t
       ; context : ('ctx, 'request, 'response) Context.t
+      ; postcondition : 'args Args.t -> 'param_ty -> 'request -> bool
       ; handler :
           'args Args.t -> 'param_ty -> 'ctx -> ('request, 'response) Handler.t
       }
       -> ('request, 'response) t
 
-let make ?middleware ~context ~route handler =
-  Service { middleware; route; context; handler }
+let make
+      ?middleware
+      ?(precondition = fun _ -> true)
+      ?(postcondition = fun _ _ _ -> true)
+      ~context
+      ~route
+      handler
+  =
+  Service { middleware; route; context; handler; precondition; postcondition }
 ;;
 
 let make_simple ?middleware ~route handler =
@@ -35,20 +44,28 @@ let dispatch
      by implementing a Trie. *)
   let rec resume = function
     | [] -> fallback request
-    | Service { middleware; route; context; handler } :: others ->
-      (match
-         Route.extract_values
-           ~given_method
-           ~given_path
-           ~given_query_params
-           route
-       with
-       | Some (args, param) ->
-         let f req = context (handler args param) req in
-         (match middleware with
-          | None -> f request
-          | Some m -> (m f) request)
-       | None -> resume others)
+    | Service
+        { middleware; route; context; handler; precondition; postcondition }
+      :: others ->
+      if precondition request
+      then (
+        match
+          Route.extract_values
+            ~given_method
+            ~given_path
+            ~given_query_params
+            route
+        with
+        | Some (args, param) ->
+          if postcondition args param request
+          then (
+            let f req = context (handler args param) req in
+            match middleware with
+            | None -> f request
+            | Some m -> (m f) request)
+          else resume others
+        | None -> resume others)
+      else resume others
   in
   resume services
 ;;
