@@ -25,7 +25,7 @@ open struct
       let path =
         let open Highway in
         let open Path in
-        [ s "foo"; s "bar"; s "baz" ]
+        Pattern.[ s "foo"; s "bar"; s "baz" ]
       in
       let expected = [ "foo"; "bar"; "baz" ]
       and computed = Highway.Path.to_list path [] in
@@ -37,7 +37,7 @@ open struct
       let path =
         let open Highway in
         let open Path in
-        [ s "foo"; string; s "baz"; int ]
+        Pattern.[ s "foo"; string; s "baz"; int ]
       in
       let expected = [ "foo"; "bar"; "baz"; "42" ]
       and computed = Highway.Path.to_list path [ "bar"; 42 ] in
@@ -49,7 +49,7 @@ open struct
       let path =
         let open Highway in
         let open Path in
-        [ s "foo"; string; s "baz"; int; bool; char; float; string ]
+        Pattern.[ s "foo"; string; s "baz"; int; bool; char; float; string ]
       in
       let expected = [ "foo"; "bar"; "baz"; "42"; "true"; "c"; "3.14"; "fin" ]
       and computed =
@@ -62,7 +62,7 @@ open struct
     type t = private int
 
     val mk : int -> t
-    val pattern : (t -> 'a, 'a) Highway.pattern
+    val pattern : (t -> 'a, 'a) Highway.Pattern.t
   end = struct
     type t = int
 
@@ -79,6 +79,7 @@ open struct
          let path =
            let open Highway in
            let open Path in
+           let open Pattern in
            [ s "foo"; string; s "baz" ]
            ++ [ int; bool; char; float; string; s "foobar" ]
            ++ [ int; int; int; Positive_int.pattern ]

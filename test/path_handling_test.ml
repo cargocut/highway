@@ -36,6 +36,7 @@ open struct
       let path =
         let open Highway in
         let open Path in
+        let open Pattern in
         [ s "foo"; string; s "baz" ]
         ++ [ int; bool; char; float; string; s "foobar" ]
         ++ [ int; int; int ]
@@ -65,6 +66,7 @@ open struct
       let path =
         let open Highway in
         let open Path in
+        let open Pattern in
         [ s "foo"; string; s "baz" ]
         ++ [ int; bool; char; float; string; s "foobar" ]
         ++ [ int; int; int; opt Hole.int ]
@@ -95,6 +97,7 @@ open struct
       let path =
         let open Highway in
         let open Path in
+        let open Pattern in
         [ s "foo"; string; s "baz" ]
         ++ [ int; bool; char; float; string; s "foobar" ]
         ++ [ int; int; int; opt Hole.int ]
@@ -125,6 +128,7 @@ open struct
       let path =
         let open Highway in
         let open Path in
+        let open Pattern in
         [ s "foo"; string; s "baz" ]
         ++ [ int; bool; char; float; string; s "foobar" ]
         ++ [ int; int; int; opt ~empty:"<none>" Hole.int ]

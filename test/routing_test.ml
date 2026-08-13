@@ -13,6 +13,9 @@ open struct
   let need_user handler req = if !req then handler "xvw" req else error 401 req
 
   module Routes = struct
+    open Route
+    open Pattern
+
     let home = get []
     let hello_auth = get [ s "hello" ]
     let hello = get [ s "hello"; string ]
@@ -22,32 +25,32 @@ open struct
 
   module Services = struct
     let home =
-      service
-        ~extractor:no_extraction
-        ~context:unit
+      Service.make
+        ~extractor:Extractor.nop
+        ~context:Context.unit
         ~route:Routes.home
         (fun [] () () _req -> "Welcome to The home of my website")
     ;;
 
     let hello_auth =
-      service
-        ~extractor:no_extraction
+      Service.make
+        ~extractor:Extractor.nop
         ~context:need_user
         ~route:Routes.hello_auth
         (fun [] () username _req -> "Welcome authorized user, " ^ username)
     ;;
 
     let hello =
-      service
-        ~extractor:no_extraction
-        ~context:unit
+      Service.make
+        ~extractor:Extractor.nop
+        ~context:Context.unit
         ~route:Routes.hello
         (fun [ name ] () () _req -> "Hello, " ^ name)
     ;;
 
     let login =
-      service
-        ~extractor:no_extraction
+      Service.make
+        ~extractor:Extractor.nop
         ~context:user_rejected
         ~route:Routes.login
         (fun [ code ] () () req ->
@@ -59,8 +62,8 @@ open struct
     ;;
 
     let logout =
-      service
-        ~extractor:no_extraction
+      Service.make
+        ~extractor:Extractor.nop
         ~context:need_user
         ~route:Routes.logout
         (fun [] () username req ->
@@ -69,7 +72,7 @@ open struct
     ;;
 
     let dispatch given_method given_path =
-      dispatch
+      Service.dispatch
         ~given_method
         ~given_path
         [ home; hello_auth; hello; login; logout ]
