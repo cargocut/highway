@@ -1,6 +1,7 @@
 (lang dune 3.21)
 (name highway)
 (version dev)
+(using mdx 0.4)
 (generate_opam_files)
 
 (source (github cargocut/highway))
@@ -29,6 +30,7 @@
   
   ;; test setup
   (alcotest (and :with-test (>= 1.9.1)))
+  (mdx (and :with-test  (>= 2.6.0)))
 
   ;; dev setup
   (utop :with-dev-setup)
