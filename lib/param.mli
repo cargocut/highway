@@ -51,6 +51,14 @@ val define
 (** [make (module P)] lift a module into a typed parameter. *)
 val make : (module Sigs.AS_PARAM with type t = 'a) -> (something, 'a) t
 
+(**  [from_hole ~key hole] build a param validator ([key=hole_value])
+     from a {!type:Hole.t}. *)
+val from_hole : key:string -> 'a Hole.t -> (something, 'a) t
+
+(**  [from_opt_hole ~key hole] build an optional param validator
+     ([key=hole_value]) from a {!type:Hole.t}. *)
+val from_opt_hole : key:string -> 'a Hole.t -> (something, 'a option) t
+
 (** [invmap device f g] map from [a] to [b]. *)
 val invmap : (something, 'a) t -> ('a -> 'b) -> ('b -> 'a) -> (something, 'b) t
 

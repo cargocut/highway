@@ -11,5 +11,6 @@ let () =
     ; Param_test.cases
     ; Route_projection_test.cases
     ; Routing_test.cases
+    ; Rw_example_test.cases
     ]
 ;;

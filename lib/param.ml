@@ -59,6 +59,22 @@ let make (type a) (module T : Sigs.AS_PARAM with type t = a) =
   define ~from_query:T.check_param ~to_query:T.render_param
 ;;
 
+let from_hole ~key hole =
+  define
+    ~from_query:(fun fields ->
+      Pidgin.Check.(req fields key (string & where_opt (Hole.from_string hole))))
+    ~to_query:(fun k -> [ key, Hole.to_string hole k ])
+;;
+
+let from_opt_hole ~key hole =
+  define
+    ~from_query:(fun fields ->
+      Pidgin.Check.(opt fields key (string & where_opt (Hole.from_string hole))))
+    ~to_query:(function
+      | None -> []
+      | Some x -> [ "key", Hole.to_string hole x ])
+;;
+
 module M = Map.Make (String)
 
 type one_or_more =
