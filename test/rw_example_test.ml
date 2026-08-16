@@ -76,7 +76,10 @@ module Routes = struct
 
   let home = get [] Param.nop
   let hello = get [ s "hello" ] (Param.string' "username")
-  let arith = post [ s "arith"; operator (); int; int ] (Param.bool' "negative")
+
+  let arith =
+    post [ s "arith"; operator (); int; int ] Param.(bool' "negative" & lang)
+  ;;
 end
 
 module Precond = struct
@@ -127,7 +130,7 @@ module Services = struct
         | Div, 0 -> false
         | _ -> true)
       ~route:Routes.arith
-      (fun [ op; x; y ] rev () { user = _ } ->
+      (fun [ op; x; y ] (rev, lang) () { user = _ } ->
          let f, str =
            match op with
            | Add -> ( + ), "+"
@@ -140,20 +143,134 @@ module Services = struct
            | Some true -> true
            | _ -> false
          in
+         let message =
+           match Option.map Pidgin.Misc.strim lang with
+           | Some "fr" | Some "french" -> "Le résultat du calcul est :"
+           | _ -> "The result of the computation is:"
+         in
          let result =
            let r = f x y in
            if rev then 0 - r else r
          in
          Format.asprintf
-           "%s(%d %s %d = %d)"
+           "%s %s(%d %s %d) = %d"
+           message
            (if rev then "-" else "")
            x
            str
            y
            result)
   ;;
+
+  let dispatch ?(given_query_params = []) given_method given_path =
+    Service.dispatch
+      ~given_method
+      ~given_path
+      ~given_query_params
+      [ home_nonauth; home_auth; arith ]
+      (error 404)
+  ;;
 end
 
-open struct end
+open struct
+  open Alcotest
 
-let cases = "Real World Example", []
+  let error_404_test =
+    test_case "produce a 404 error" `Quick (fun () ->
+      let request = { user = None } in
+      let expected = "Error 404"
+      and computed = Services.dispatch `TRACE [] request in
+      check string "should be equal" expected computed)
+  ;;
+
+  let error_404_test2 =
+    test_case "produce a 404 error (because of precond)" `Quick (fun () ->
+      let request = { user = None } in
+      let expected = "Error 404"
+      and computed =
+        Services.dispatch `POST [ "arith"; "div"; "2"; "0" ] request
+      in
+      check string "should be equal" expected computed)
+  ;;
+
+  let home_nonauth_test =
+    test_case "fetch the home page" `Quick (fun () ->
+      let request = { user = None } in
+      let expected = "Hello anonymous"
+      and computed = Services.dispatch `GET [] request in
+      check string "should be equal" expected computed)
+  ;;
+
+  let home_auth_test =
+    test_case "fetch the home page" `Quick (fun () ->
+      let request = { user = Some "xvw" } in
+      let expected = "Hello xvw"
+      and computed = Services.dispatch `GET [] request in
+      check string "should be equal" expected computed)
+  ;;
+
+  let arith_test =
+    test_case "make arithmetic" `Quick (fun () ->
+      let request = { user = None } in
+      let expected = "The result of the computation is: (15 / 3) = 5"
+      and computed =
+        Services.dispatch `POST [ "arith"; "div"; "15"; "3" ] request
+      in
+      check string "should be equal" expected computed)
+  ;;
+
+  let arith_test2 =
+    test_case "make arithmetic" `Quick (fun () ->
+      let request = { user = None } in
+      let expected = "The result of the computation is: -(15 / 3) = -5"
+      and computed =
+        Services.dispatch
+          ~given_query_params:[ "negative", "true" ]
+          `POST
+          [ "arith"; "div"; "15"; "3" ]
+          request
+      in
+      check string "should be equal" expected computed)
+  ;;
+
+  let arith_test3 =
+    test_case "make arithmetic" `Quick (fun () ->
+      let request = { user = None } in
+      let expected = "The result of the computation is: (15 / 3) = 5"
+      and computed =
+        Services.dispatch
+          ~given_query_params:[ "negative", "false" ]
+          `POST
+          [ "arith"; "div"; "15"; "3" ]
+          request
+      in
+      check string "should be equal" expected computed)
+  ;;
+
+  let arith_test4 =
+    test_case "make arithmetic" `Quick (fun () ->
+      let request = { user = None } in
+      let expected = "Le résultat du calcul est : (15 / 3) = 5"
+      and computed =
+        Services.dispatch
+          ~given_query_params:[ "negative", "false"; "lang", "fr" ]
+          `POST
+          [ "arith"; "div"; "15"; "3" ]
+          request
+      in
+      check string "should be equal" expected computed)
+  ;;
+end
+
+let cases =
+  ( "Real World Example"
+  , [ error_404_test
+    ; error_404_test2
+    ; home_nonauth_test
+    ; home_auth_test
+    ; arith_test
+    ; arith_test2
+    ; arith_test3
+    ; arith_test4
+    ] )
+;;

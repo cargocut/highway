@@ -265,6 +265,30 @@ open struct
       and computed = Highway.Param.from_query Highway.Param.lax subject in
       check (option unit) "should be equal" expected computed)
   ;;
+
+  let from_query9 =
+    test_case "from_query" `Quick (fun () ->
+      let subject = [ "test", "true" ] in
+      let expected = Some true
+      and computed =
+        Highway.Param.from_query
+          Highway.Param.(from_hole ~key:"test" Highway.Hole.bool)
+          subject
+      in
+      check (option bool) "should be equal" expected computed)
+  ;;
+
+  let from_query10 =
+    test_case "from_query" `Quick (fun () ->
+      let subject = [ "test", "false" ] in
+      let expected = Some (Some false)
+      and computed =
+        Highway.Param.from_query
+          Highway.Param.(from_opt_hole ~key:"test" Highway.Hole.bool)
+          subject
+      in
+      check (option @@ option bool) "should be equal" expected computed)
+  ;;
 end
 
 let cases =
@@ -282,5 +306,7 @@ let cases =
     ; from_query6
     ; from_query7
     ; from_query8
+    ; from_query9
+    ; from_query10
     ] )
 ;;
