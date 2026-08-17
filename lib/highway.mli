@@ -234,6 +234,14 @@ val trace
   -> ('cstr, 'param_ty) param
   -> (local, [> `TRACE ], 'cstr, 'param_ty, 'k) route
 
+(** {2 Building global routes} *)
+
+(** [global base_url local_route] makes [local_route] a global one. *)
+val global
+  :  string
+  -> (local, 'meth, 'cstr, 'param_ty, 'k) route
+  -> (global, 'meth, 'cstr, 'param_ty, 'k) route
+
 (** {1 Internal modules}
 
     Re-exporting internal modules (if functions are not re-exported in

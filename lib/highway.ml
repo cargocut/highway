@@ -66,3 +66,4 @@ let patch = Route.patch
 let put = Route.put
 let query = Route.query
 let trace = Route.trace
+let global = Route.global
