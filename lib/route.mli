@@ -158,6 +158,27 @@ val html_action'
   -> 'param_ty
   -> string
 
+(** [target ?anchor ?extra_params route args] compute a link for a
+    given route, without any constraints (this can be used, for
+    example, to create [fetch] calls in JavaScript). *)
+val target
+  :  ?anchor:string
+  -> ?extra_params:(string * string) list
+  -> ('scope, 'meth, Param.something, 'param_ty, 'args) t
+  -> 'args Args.t
+  -> 'param_ty
+  -> string
+
+(** [target' ?anchor route args] is like {!val:target}
+    disallowing [extra_params] (to ensure that params indexed by
+    {!val:Param.nop} are reachable by the router). *)
+val target'
+  :  ?anchor:string
+  -> ('scope, 'meth, Param.nothing, 'param_ty, 'args) t
+  -> 'args Args.t
+  -> 'param_ty
+  -> string
+
 (** {1 Extracting values} *)
 
 (** Extract values for routing. *)
