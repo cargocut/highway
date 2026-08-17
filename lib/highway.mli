@@ -62,11 +62,20 @@ and nothing = Param.nothing
 (** Describes the authorization of parameters. *)
 and something = Param.something
 
+(** A route is a combination of a scope ({!type:local} or
+    {!type:global}), a {{!type:meth} method}, a {{!type:path} path},
+    and a {{!type:param} query parameter validator}.
+
+    Routes are the building blocks for creating services (a controller
+    associated with a route) and for generating links for given routes
+    while adhering to the typing defined by the holes in a path. *)
 type ('scope, +'meth, 'cstrs, 'params_ty, 'k) route =
   ('scope, 'meth, 'cstrs, 'params_ty, 'k) Route.t
-(**  *)
 
+(** Describes the local scope (inside the application). *)
 and local = Route.local
+
+(** Describes the global scope (outside the application). *)
 and global = Route.global
 
 (** {1 Describing patterns} *)
@@ -108,7 +117,10 @@ val opt : ?empty:string -> 'a hole -> ('a option -> 'b, 'b) pattern
     potentially debatable choice because, unlike the placeholders
     introduced in a route's patterns, the order of the parameters is
     of little importance. For this reason, all parameters observable
-    in the router are processed by a parameter validation function. *)
+    in the router are processed by a parameter validation function.
+
+    You can describe and compose more Query Param description using
+    the module {!module:Param}. *)
 
 (** Describes a validator that explicitly rejects all query
     parameters. *)
@@ -117,6 +129,8 @@ val discard_params : (nothing, unit) param
 (** Describes a validator that explicitly ignores all query
     parameters. *)
 val ignore_params : (something, unit) param
+
+(** {2 Building Param description} *)
 
 (** [make_params ~from_query ~to_query] Creates a query parameter
     validator.
@@ -133,6 +147,11 @@ val make_params'
   :  (module Sigs.AS_PARAM with type t = 'a)
   -> (something, 'a) param
 
+(** {2 From holes}
+
+    For "unique" query parameters, you can use {!module:Hole} to
+    describe them "on the fly." *)
+
 (** [param_from_hole ~key hole] define a single param indexed by [key]
     using a {!module:Hole} as validator. *)
 val param_from_hole : key:string -> 'a hole -> (something, 'a) param
@@ -140,6 +159,80 @@ val param_from_hole : key:string -> 'a hole -> (something, 'a) param
 (** [opt_param_from_hole ~key hole] define a single optional param
     indexed by [key] using a {!module:Hole} as validator. *)
 val opt_param_from_hole : key:string -> 'a hole -> (something, 'a option) param
+
+(** {1 Routes} *)
+
+(** {2 Building internal routes} *)
+
+(** [get path] describes a local route, associated to the method [GET]
+    for the given [path]. *)
+val get
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `GET ], 'cstr, 'param_ty, 'k) route
+
+(** [post path] describes a local route, associated to the method [POST]
+    for the given [path]. *)
+val post
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `POST ], 'cstr, 'param_ty, 'k) route
+
+(** [connect path] describes a local route, associated to the method [CONNECT]
+    for the given [path]. *)
+val connect
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `CONNECT ], 'cstr, 'param_ty, 'k) route
+
+(** [delete path] describes a local route, associated to the method [DELETE]
+    for the given [path]. *)
+val delete
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `DELETE ], 'cstr, 'param_ty, 'k) route
+
+(** [head path] describes a local route, associated to the method [HEAD]
+    for the given [path]. *)
+val head
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `HEAD ], 'cstr, 'param_ty, 'k) route
+
+(** [options path] describes a local route, associated to the method [OPTIONS]
+    for the given [path]. *)
+val options
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `OPTIONS ], 'cstr, 'param_ty, 'k) route
+
+(** [patch path] describes a local route, associated to the method [PATCH]
+    for the given [path]. *)
+val patch
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `PATCH ], 'cstr, 'param_ty, 'k) route
+
+(** [put path] describes a local route, associated to the method [PUT]
+    for the given [path]. *)
+val put
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `PUT ], 'cstr, 'param_ty, 'k) route
+
+(** [query path] describes a local route, associated to the method [QUERY]
+    for the given [path]. *)
+val query
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `QUERY ], 'cstr, 'param_ty, 'k) route
+
+(** [trace path] describes a local route, associated to the method [TRACE]
+    for the given [path]. *)
+val trace
+  :  ('k, Void.t) path
+  -> ('cstr, 'param_ty) param
+  -> (local, [> `TRACE ], 'cstr, 'param_ty, 'k) route
 
 (** {1 Internal modules}
 

@@ -53,3 +53,16 @@ let make_params = Param.define
 let make_params' = Param.make
 let param_from_hole = Param.from_hole
 let opt_param_from_hole = Param.from_opt_hole
+
+(* Routes *)
+
+let get = Route.get
+let post = Route.post
+let connect = Route.connect
+let delete = Route.delete
+let head = Route.head
+let options = Route.options
+let patch = Route.patch
+let put = Route.put
+let query = Route.query
+let trace = Route.trace
