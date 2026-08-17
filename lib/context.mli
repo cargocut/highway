@@ -4,8 +4,7 @@
    SPDX-License-Identifier: BSD-3-Clause *)
 
 (** A context is a type of middleware that allows a value to be passed
-    to the handler functions assigned to {!val:Service.contextual}
-    services. *)
+    to the handler functions assigned to services. *)
 
 (** {1 Types} *)
 
@@ -18,6 +17,5 @@ type ('ctx, 'request, 'response) t =
 (** [const x] establishes a context for a constant value. *)
 val const : 'a -> ('a, 'request, 'response) t
 
-(** [unit] describes the [unit] context, which is used for
-    {!val:Service.simple} services. *)
+(** [unit] describes the [unit] context. *)
 val unit : (unit, 'request, 'response) t
