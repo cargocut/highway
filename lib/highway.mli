@@ -78,6 +78,18 @@ and local = Route.local
 (** Describes the global scope (outside the application). *)
 and global = Route.global
 
+(** Describes a function from ['request] to ['response]. *)
+type ('request, 'response) handler = ('request, 'response) Handler.t
+
+(** Describes a middleware that extends a given {!type:handler}. *)
+type ('request, 'response) middleware = ('request, 'response) Middleware.t
+
+(** Describes a specific handler that passes a context to handlers. *)
+type ('ctx, 'request, 'response) context = ('ctx, 'request, 'response) Context.t
+
+(** Describes a service. A controller associated with a route. *)
+type ('request, 'response) service = ('request, 'response) Service.t
+
 (** {1 Describing patterns} *)
 
 (** {2 Literal Pattern} *)
@@ -241,6 +253,117 @@ val global
   :  string
   -> (local, 'meth, 'cstr, 'param_ty, 'k) route
   -> (global, 'meth, 'cstr, 'param_ty, 'k) route
+
+(** {2 Link Generation}
+
+    Routes are used to generate links and generally follow this pattern:
+    [function ?anchor ?extra_params route args].
+
+    They are backed by quoted versions that prevent extra parameters
+    from being passed to routes that do not accept query
+    parameters. *)
+
+(** [html_href ?anchor ?extra_params route args param] generates a
+    link that can be used in a [<a>] tag for a given [route] (using
+    [args] and [param]). The link can be attached to [anchor] and
+    [extra_params] *)
+val html_href
+  :  ?anchor:string
+  -> ?extra_params:(string * string) list
+  -> ('scope, Method.for_html_links, something, 'param_ty, 'args) route
+  -> 'args args
+  -> 'param_ty
+  -> string
+
+(** [html_href' ?anchor route args param] same as {!val:html_href} but
+    disallow [extra_params] (usable with [nothing] constraint). *)
+val html_href'
+  :  ?anchor:string
+  -> ('scope, Method.for_html_links, 'cstrs, 'param_ty, 'args) route
+  -> 'args args
+  -> 'param_ty
+  -> string
+
+(** [html_action ?anchor ?extra_params route args param] generates a
+    link that can be used in a [<form action=...>] tag for a given
+    [route] (using [args] and [param]). The link can be attached to
+    [anchor] and [extra_params] *)
+val html_action
+  :  ?anchor:string
+  -> ?extra_params:(string * string) list
+  -> ('scope, Method.for_html_form, something, 'param_ty, 'args) route
+  -> 'args args
+  -> 'param_ty
+  -> string
+
+(** [html_action' ?anchor route args param] same as {!val:html_action}
+    but disallow [extra_params] (usable with [nothing] constraint). *)
+val html_action'
+  :  ?anchor:string
+  -> ('scope, Method.for_html_form, 'cstrs, 'param_ty, 'args) route
+  -> 'args args
+  -> 'param_ty
+  -> string
+
+(** [target ?anchor ?extra_params route args] compute a link for a
+    given route, without any method constraints (this can be used, for
+    example, to create [fetch] calls in JavaScript). *)
+val target
+  :  ?anchor:string
+  -> ?extra_params:(string * string) list
+  -> ('scope, 'meth, something, 'param_ty, 'args) route
+  -> 'args args
+  -> 'param_ty
+  -> string
+
+(** [target' ?anchor route args param] same as {!val:target}
+    but disallow [extra_params] (usable with [nothing] constraint). *)
+val target'
+  :  ?anchor:string
+  -> ('scope, 'meth, 'cstrs, 'param_ty, 'args) route
+  -> 'args args
+  -> 'param_ty
+  -> string
+
+(** {1 Middleware}
+
+    A middleware is a composable function that wraps a web handler to
+    process a request before it reaches the handler and/or a response
+    after it returns. *)
+
+(** [middleware_list some_middlware] reduce a list of middleware into
+    one, sequentially. It allows to collapse multiple middleware. *)
+val middleware_list
+  :  ('request, 'response) middleware list
+  -> ('request, 'response) middleware
+
+(** {1 Context}
+
+    A context is a specific type of middleware that allows data to be
+    injected arbitrarily into a service handler associated with a
+    route. *)
+
+(** No context, inject [unit] as a context. *)
+val no_context : (unit, 'request, 'response) context
+
+(** [value_context x] inject [x] as a context. *)
+val value_context : 'a -> ('a, 'request, 'response) context
+
+(** {1 Service}
+
+    A service is a controller associated with a route. Along with
+    {!type:route}, it is the main component of Highway. *)
+
+(** [service ?middleware ?precondition ?postcondition ~context ~route handler]
+    describes a service/controller. *)
+val service
+  :  ?middleware:('request, 'response) middleware
+  -> ?precondition:('request -> bool)
+  -> ?postcondition:('args args -> 'param_ty -> 'request -> bool)
+  -> context:('ctx, 'request, 'response) context
+  -> route:(local, meth, 'cstr, 'param_ty, 'args) route
+  -> ('args args -> 'param_ty -> 'ctx -> ('request, 'response) handler)
+  -> ('request, 'response) service
 
 (** {1 Internal modules}
 

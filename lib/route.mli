@@ -126,12 +126,12 @@ val html_href
   -> 'param_ty
   -> string
 
-(** [html_href' ?anchor route args] is like {!val:html_href}
+(** [html_href' ?anchor route args param] is like {!val:html_href}
     disallowing [extra_params] (to ensure that params indexed by
     {!val:Param.nop} are reachable by the router). *)
 val html_href'
   :  ?anchor:string
-  -> ('scope, Method.for_html_links, Param.nothing, 'param_ty, 'args) t
+  -> ('scope, Method.for_html_links, 'cstrs, 'param_ty, 'args) t
   -> 'args Args.t
   -> 'param_ty
   -> string
@@ -153,13 +153,13 @@ val html_action
     {!val:Param.nop} are reachable by the router). *)
 val html_action'
   :  ?anchor:string
-  -> ('scope, Method.for_html_form, Param.nothing, 'param_ty, 'args) t
+  -> ('scope, Method.for_html_form, 'cstrs, 'param_ty, 'args) t
   -> 'args Args.t
   -> 'param_ty
   -> string
 
 (** [target ?anchor ?extra_params route args] compute a link for a
-    given route, without any constraints (this can be used, for
+    given route, without any method constraints (this can be used, for
     example, to create [fetch] calls in JavaScript). *)
 val target
   :  ?anchor:string
@@ -174,7 +174,7 @@ val target
     {!val:Param.nop} are reachable by the router). *)
 val target'
   :  ?anchor:string
-  -> ('scope, 'meth, Param.nothing, 'param_ty, 'args) t
+  -> ('scope, 'meth, 'cstrs, 'param_ty, 'args) t
   -> 'args Args.t
   -> 'param_ty
   -> string

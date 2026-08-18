@@ -35,6 +35,11 @@ type ('scope, +'meth, 'cstrs, 'params_ty, 'k) route =
 and local = Route.local
 and global = Route.global
 
+type ('request, 'response) handler = ('request, 'response) Handler.t
+type ('request, 'response) middleware = ('request, 'response) Middleware.t
+type ('ctx, 'request, 'response) context = ('ctx, 'request, 'response) Context.t
+type ('request, 'response) service = ('request, 'response) Service.t
+
 (* Pattern definition *)
 
 let s = Pattern.s
@@ -67,3 +72,22 @@ let put = Route.put
 let query = Route.query
 let trace = Route.trace
 let global = Route.global
+
+(* Route generation *)
+
+let html_href = Route.html_href
+let html_href' = Route.html_href'
+let html_action = Route.html_action
+let html_action' = Route.html_action'
+let target = Route.target
+let target' = Route.target'
+
+(* Middleware *)
+
+let middleware_list = Middleware.fold
+
+(* Context *)
+
+let no_context = Context.unit
+let value_context = Context.const
+let service = Service.make
