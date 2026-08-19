@@ -90,4 +90,8 @@ let middleware_list = Middleware.fold
 
 let no_context = Context.unit
 let value_context = Context.const
+
+(* Service *)
+
 let service = Service.make
+let dispatch = Service.dispatch

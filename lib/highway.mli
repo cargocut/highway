@@ -135,11 +135,11 @@ val opt : ?empty:string -> 'a hole -> ('a option -> 'b, 'b) pattern
     the module {!module:Param}. *)
 
 (** Describes a validator that explicitly rejects all query
-    parameters. *)
+    parameters. (Or {!val:Param.nop}) *)
 val discard_params : (nothing, unit) param
 
 (** Describes a validator that explicitly ignores all query
-    parameters. *)
+    parameters. (Or {!val:Param.lax}) *)
 val ignore_params : (something, unit) param
 
 (** {2 Building Param description} *)
@@ -148,13 +148,14 @@ val ignore_params : (something, unit) param
     validator.
 
     [from_query] uses a Pidgin record validator and [to_query]
-    produces an associative list, where the arrays repeat the keys. *)
+    produces an associative list, where the arrays repeat the
+    keys. (Or {!val:Param.define}) *)
 val make_params
   :  from_query:((string * Pidgin.Repr.t) list -> 'a Pidgin.Check.record)
   -> to_query:('a -> (string * string) list)
   -> (something, 'a) param
 
-(** Same as {!val:make_params} but use a module. *)
+(** Same as {!val:make_params} but use a module. (Or {!val:Param.make}) *)
 val make_params'
   :  (module Sigs.AS_PARAM with type t = 'a)
   -> (something, 'a) param
@@ -332,7 +333,8 @@ val target'
     after it returns. *)
 
 (** [middleware_list some_middlware] reduce a list of middleware into
-    one, sequentially. It allows to collapse multiple middleware. *)
+    one, sequentially. It allows to collapse multiple middleware. (or
+    {!val:Middleware.fold}) *)
 val middleware_list
   :  ('request, 'response) middleware list
   -> ('request, 'response) middleware
@@ -343,10 +345,12 @@ val middleware_list
     injected arbitrarily into a service handler associated with a
     route. *)
 
-(** No context, inject [unit] as a context. *)
+(** No context, inject [unit] as a context. (or
+    {!val:Context.unit}) *)
 val no_context : (unit, 'request, 'response) context
 
-(** [value_context x] inject [x] as a context. *)
+(** [value_context x] inject [x] as a context. (or
+    {!val:Context.const}) *)
 val value_context : 'a -> ('a, 'request, 'response) context
 
 (** {1 Service}
@@ -355,7 +359,27 @@ val value_context : 'a -> ('a, 'request, 'response) context
     {!type:route}, it is the main component of Highway. *)
 
 (** [service ?middleware ?precondition ?postcondition ~context ~route handler]
-    describes a service/controller. *)
+    describes a service/controller. (or {!val:Service.make})
+
+    - [middleware] allows you to assign additional middleware to a
+      route, which is executed after the route is selected. (You can use
+      {!val:middleware_list} to sequentially compose multiple middleware
+      components.)
+
+    - [precondition] checks a precondition only if the method matches,
+      before proceeding to extract the path and query parameters. If the
+      function returns [false], it moves on to the next route. By
+      default, the function always returns [true].
+
+    - [postcondition] checks a precondition after the extraction the
+      path and query parameters (before the middlware and context
+      application). If the function returns [false], it moves on to the
+      next route. By default, the function always returns [true].
+
+    - [context] A type of middleware that allows you to provision an
+      additional value. To ignore it, use {!val:no_context}.
+
+    - [route] the route of the service. *)
 val service
   :  ?middleware:('request, 'response) middleware
   -> ?precondition:('request -> bool)
@@ -364,6 +388,21 @@ val service
   -> route:(local, meth, 'cstr, 'param_ty, 'args) route
   -> ('args args -> 'param_ty -> 'ctx -> ('request, 'response) handler)
   -> ('request, 'response) service
+
+(** {2 Routing services}
+
+    Now that we can describe services, the final step is to choose the
+    right service from a given list. *)
+
+(** [dispatch ~given_method ~give_path ~given_query_params services]
+    describes a {!type:middleware} that selects a service from a given
+    list (or falls back to the next middleware). *)
+val dispatch
+  :  given_method:meth
+  -> given_path:string list
+  -> given_query_params:(string * string) list
+  -> ('request, 'response) service list
+  -> ('request, 'response) middleware
 
 (** {1 Internal modules}
 
