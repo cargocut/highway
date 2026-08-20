@@ -76,6 +76,43 @@ val to_query_params : ('cstrs, 'ty) t -> 'ty -> (string * string) list
 (** [to_query_strings params value] the computed query string. *)
 val to_query_string : ('cstrs, 'ty) t -> 'ty -> string option
 
+(** {1 Prebuilt params}
+
+    A set of pre-built query parameters based on {!module:Hole}. All
+    of these parameters take a string (the query parameter key) as an
+    argument. *)
+
+(** [string key] describes the [key=a_string] parameter. *)
+val string : string -> (something, string) t
+
+(** [string_opt key] describes the optional [key=a_string]
+    parameter. *)
+val string_opt : string -> (something, string option) t
+
+(** [int key] describes the [key=an_int] parameter. *)
+val int : string -> (something, int) t
+
+(** [int_opt key] describes the optional [key=an_int] parameter. *)
+val int_opt : string -> (something, int option) t
+
+(** [float key] describes the [key=a_float] parameter. *)
+val float : string -> (something, float) t
+
+(** [float_opt key] describes the optional [key=a_float] parameter. *)
+val float_opt : string -> (something, float option) t
+
+(** [char key] describes the [key=a_char] parameter. *)
+val char : string -> (something, char) t
+
+(** [char_opt key] describes the optional [key=a_char] parameter. *)
+val char_opt : string -> (something, char option) t
+
+(** [bool key] describes the [key=a_bool] parameter. *)
+val bool : string -> (something, bool) t
+
+(** [bool_opt key] describes the optional [key=a_bool] parameter. *)
+val bool_opt : string -> (something, bool option) t
+
 (** {1 Infix operators} *)
 
 module Infix : sig

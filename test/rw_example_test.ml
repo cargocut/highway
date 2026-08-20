@@ -136,7 +136,7 @@ module Services = struct
            | Add -> ( + ), "+"
            | Sub -> ( - ), "-"
            | Mul -> ( * ), "*"
-           | Div -> ( / ), "/"
+           | Div -> Stdlib.( / ), "/"
          in
          let rev =
            match rev with

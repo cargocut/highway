@@ -14,7 +14,181 @@
     generate links using an API similar to the
     {{:https://ocaml.org/manual/5.5/api/Format.html} Format module},
     and to attach controllers to them, similar to the
-    {{:https://ocaml.org/manual/5.5/api/Scanf.html} Scanf} module. *)
+    {{:https://ocaml.org/manual/5.5/api/Scanf.html} Scanf} module.
+
+    Highway is primarily used to describe {!type:route} and associate
+    them with {{!type:service} services}.
+
+    {@ocaml[
+    # open Highway ;;
+    ]}
+
+    {2 Describing routes}
+
+    To begin with, Highway provides a DSL for describing routes: the
+    combination of an HTTP method, a path and a set of query
+    parameters. For now, we won’t concern ourselves with query
+    parameters.
+
+    Let's define a set of routes:
+
+    {@ocaml[
+    # module Routes = struct
+        let home = get [] ignore_params
+        let hello = get [s "hello"] ignore_params
+        let hello_to = get [s "hello"; string] ignore_params
+      end ;;
+    module Routes :
+      sig
+        val home : (local, [> `GET ], something, unit, Void.t) route
+        val hello : (local, [> `GET ], something, unit, Void.t) route
+        val hello_to :
+          (local, [> `GET ], something, unit, string -> Void.t) route
+      end
+    ]}
+
+    As you can see, road types contain a lot of information:
+
+    - [scope] (can be [local] or [global]), that describe the scope of
+      a route. If it is [local], it refers to a route that is "internal"
+      to the application, and later, it can be associated with a
+      service. If the route is global, it is associated with a domain
+      and is external to the application (and therefore cannot be
+      associated with a service).
+
+    - [met], describes the HTTP method of the route. This tracking is
+      useful because it allows you, for example, to prevent certain
+      link-generation functions from being used on specific routes. (For
+      example, {!val:html_href}, which generates a link usable for [<a>]
+      tags, works only for routes associated with the [GET] method).
+
+    - [constraints] Specifies whether the route disallows query
+      parameters (the router will continuously reject requests
+      containing query parameters). It can have two values: [something],
+      which allows query parameters, and [nothing], which disallows
+      query parameters.
+
+    - [param_type] the type of all (valid) query parameters. If the
+      constraint is [nothing], it will always be [unit]. Here, in our
+      examples, we ignore the query parameters (we don't prohibit them),
+      but their value is also [unit].
+
+    - [path_params] describes a function that returns [void]
+      parameters extracted from the route path.
+
+    Here is an other example with a lot of path parameters (and
+    prohibiting query parameters):
+
+    {@ocaml[
+    # post
+        [int; string; float; bool; s "foo"; s "bar"; int]
+        discard_params ;;
+    - : (local, [> `POST ], nothing, unit,
+         int -> string -> float -> bool -> int -> Void.t)
+        route
+    = <abstr>
+    ]}
+
+    {3 Computing links from routes}
+
+    The separation of a route's definition from its association with a
+    service is heavily inspired by {{:https://ocsigen.org/}
+    Ocsigen/Eliom}; it allows routes to be used within services to
+    describe connections between different services (and to manage
+    form actions).
+
+    Link generation is based on three functions:
+
+    - {!val:html_href} which generates a link to be used in a [<a>]
+      tag for the [href] attribute (among others), and this function
+      only applies to [GET] routes.
+
+    - {!val:html_action} which generates a link to be used in a
+      [<form>] tag for the [method] attribute (among others), and this
+      function only applies to [GET] and [POST] routes.
+
+    - {!val:target} which generates the arbitrary route link (which
+      can be used, for example, to implement an ambitious
+      {{:https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API}
+      fetch} function).
+
+    These three functions fill in the gaps in the routes described by
+    the [path] and the [query params], and allow you to associate
+    additional query parameters (using the [extra_params] parameter,
+    it is useful since a service can extract other query params after
+    the routing, for example) and an optional anchor (using the
+    [anchor] parameter).
+
+    Functions have "quoted images", which reject extra parameters
+    (traditional functions require routes with [something] as a
+    constraint).
+
+    Here is some example of generating links for routes:
+
+    {@ocaml[
+    # html_href Routes.home [] ();;
+    - : string = "/"
+    ]}
+
+    {@ocaml[
+        # html_href Routes.hello [] ();;
+        - : string = "/hello"
+    ]}
+
+    {@ocaml[
+        # html_href Routes.hello_to ["Xavier"] ();;
+        - : string = "/hello/Xavier"
+    ]}
+
+    And with extra parameters and anchor:
+
+    {@ocaml[
+        # html_href
+             ~extra_params:["foo", "true"; "bar", "hello"]
+             ~anchor:"top-content"
+             Routes.hello_to ["Xavier"] ();;
+        - : string = "/hello/Xavier?foo=true&bar=hello#top-content"
+    ]}
+
+    Or here's a broader example that illustrates the heterogeneous
+    nature of {!type:args}:
+
+    {@ocaml[
+    let a_route =
+      post
+        [ int; string; float; bool; s "foo"; s "bar"; int; s "a-long-url" ]
+        discard_params
+    ;;
+    ]}
+
+    We will use {!val:html_action'} since it is a [POST] route that
+    disallows query params. First, we can see the error if we did not
+    give a proper list of path fragment:
+
+    {@ocaml[
+    # html_action'
+        a_route
+        [42; "foo"; 3.14] () ;;
+    Line 3, characters 21-22:
+    Error: The constructor [] has type Void.t args
+           but an expression was expected of type (bool -> int -> Void.t) args
+           Type Void.t is not compatible with type bool -> int -> Void.t
+    ]}
+
+    The error indicates that the list ends prematurely and that some
+    fragments are missing during compilation.
+
+    {@ocaml[
+    # html_action'
+        a_route
+        [42; "foo"; 3.14; false; 42]
+        ~anchor:"a-specific-part-of-the-document"
+        () ;;
+    - : string =
+    "/42/foo/3.14/false/foo/bar/42/a-long-url#a-specific-part-of-the-document"
+    ]}
+
+    {3 Query Params} *)
 
 (** {1 Types}
 
@@ -172,6 +346,47 @@ val param_from_hole : key:string -> 'a hole -> (something, 'a) param
 (** [opt_param_from_hole ~key hole] define a single optional param
     indexed by [key] using a {!module:Hole} as validator. *)
 val opt_param_from_hole : key:string -> 'a hole -> (something, 'a option) param
+
+(** {3 Prebuilt params on top of holes}
+
+    A set of pre-built query parameters based on {!module:Hole}. All
+    of these parameters take a string (the query parameter key) as an
+    argument. *)
+
+(** [string_param key] describes the [key=a_string] parameter. *)
+val string_param : string -> (something, string) param
+
+(** [string_opt_param key] describes the optional [key=a_string]
+    parameter. *)
+val string_opt_param : string -> (something, string option) param
+
+(** [int_param key] describes the [key=an_int] parameter. *)
+val int_param : string -> (something, int) param
+
+(** [int_opt_param key] describes the optional [key=an_int]
+    parameter. *)
+val int_opt_param : string -> (something, int option) param
+
+(** [float_param key] describes the [key=a_float] parameter. *)
+val float_param : string -> (something, float) param
+
+(** [float_opt_param key] describes the optional [key=a_float]
+    parameter. *)
+val float_opt_param : string -> (something, float option) param
+
+(** [char_param key] describes the [key=a_char] parameter. *)
+val char_param : string -> (something, char) param
+
+(** [char_opt_param key] describes the optional [key=a_char]
+    parameter. *)
+val char_opt_param : string -> (something, char option) param
+
+(** [bool_param key] describes the [key=a_bool] parameter. *)
+val bool_param : string -> (something, bool) param
+
+(** [bool_opt_param key] describes the optional [key=a_bool]
+    parameter. *)
+val bool_opt_param : string -> (something, bool option) param
 
 (** {1 Routes} *)
 
@@ -403,6 +618,33 @@ val dispatch
   -> given_query_params:(string * string) list
   -> ('request, 'response) service list
   -> ('request, 'response) middleware
+
+(** {1 Infix}
+
+    A set of infix operators to simplify the use and composition of
+    some Highway objects. *)
+
+module Infix : sig
+  (** Infix operators *)
+
+  (** [tl1 ++ tl2] is [Path.append tl2 tl2], see
+      {!val:Path.append}. *)
+  val ( ++ ) : ('a, 'b) path -> ('b, 'c) path -> ('a, 'c) path
+
+  (** [param_a & param_b] compose the product of two query params. *)
+  val ( & )
+    :  (something, 'ty_a) param
+    -> (something, 'ty_b) param
+    -> (something, 'ty_a * 'ty_b) param
+
+  (** [param_a / param_b] compose the sum of two query params. *)
+  val ( / )
+    :  (something, 'ty_a) param
+    -> (something, 'ty_b) param
+    -> (something, ('ty_a, 'ty_b) Either.t) param
+end
+
+include module type of Infix (** @inline *)
 
 (** {1 Internal modules}
 

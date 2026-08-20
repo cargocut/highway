@@ -160,3 +160,14 @@ let concat_query_params = function
 let to_query_string : type cstr a. (cstr, a) t -> a -> string option =
   fun device subject -> subject |> to_query_params device |> concat_query_params
 ;;
+
+let string key = from_hole ~key Hole.string
+let string_opt key = from_opt_hole ~key Hole.string
+let int key = from_hole ~key Hole.int
+let int_opt key = from_opt_hole ~key Hole.int
+let float key = from_hole ~key Hole.float
+let float_opt key = from_opt_hole ~key Hole.float
+let char key = from_hole ~key Hole.char
+let char_opt key = from_opt_hole ~key Hole.char
+let bool key = from_hole ~key Hole.bool
+let bool_opt key = from_opt_hole ~key Hole.bool

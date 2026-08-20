@@ -59,6 +59,19 @@ let make_params' = Param.make
 let param_from_hole = Param.from_hole
 let opt_param_from_hole = Param.from_opt_hole
 
+(* Params from hole *)
+
+let string_param = Param.string
+let string_opt_param = Param.string_opt
+let int_param = Param.int
+let int_opt_param = Param.int_opt
+let float_param = Param.float
+let float_opt_param = Param.float_opt
+let char_param = Param.char
+let char_opt_param = Param.char_opt
+let bool_param = Param.bool
+let bool_opt_param = Param.bool_opt
+
 (* Routes *)
 
 let get = Route.get
@@ -95,3 +108,13 @@ let value_context = Context.const
 
 let service = Service.make
 let dispatch = Service.dispatch
+
+(* Infix *)
+
+module Infix = struct
+  let ( & ) = Param.Infix.( & )
+  let ( / ) = Param.Infix.( / )
+  let ( ++ ) = Path.Infix.( ++ )
+end
+
+include Infix
