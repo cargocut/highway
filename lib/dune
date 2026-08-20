@@ -6,4 +6,4 @@
 
 (mdx
  (files *.mli)
- (libraries highway))
+ (libraries pidgin highway))

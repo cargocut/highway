@@ -9,6 +9,7 @@ let () =
     [ Path_projection_test.cases
     ; Path_handling_test.cases
     ; Param_test.cases
+    ; Nested_list_test.cases
     ; Route_projection_test.cases
     ; Routing_test.cases
     ; Rw_example_test.cases

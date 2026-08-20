@@ -102,6 +102,15 @@ let to_pidgin_str = function
   | s -> string_to_pidgin s
 ;;
 
+let from_nested_list list =
+  list
+  |> List.fold_left
+       (fun acc (k, xs) ->
+          xs |> List.fold_left (fun sacc x -> (k, x) :: sacc) acc)
+       []
+  |> List.rev
+;;
+
 let to_pidgin list =
   (* NOTE: The purpose of this function is to provide a reasonable
      representation of query parameters as a [string * string] list in

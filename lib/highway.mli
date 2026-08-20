@@ -89,6 +89,9 @@
     = <abstr>
     ]}
 
+    You can define your own hole using {!module:Hole} and
+    {!module:Pattern}.
+
     {3 Computing links from routes}
 
     The separation of a route's definition from its association with a
@@ -188,7 +191,210 @@
     "/42/foo/3.14/false/foo/bar/42/a-long-url#a-specific-part-of-the-document"
     ]}
 
-    {3 Query Params} *)
+    {3 Query Params}
+
+    Even though query parameters can be used within the body of a
+    service, it is sometimes convenient to extract some of them
+    directly during the routing phase so they can be used immediately
+    in the body of a service. That is why a route description allows
+    you to define a strategy for extracting query parameters.
+
+    Since Highway makes no assumptions about the framework being used,
+    the library assumes that query parameters are represented as an
+    associative list of [string * string]. So, for example, the
+    following query string: [?foo=bar&x=10&foo=message] produces the
+    following list:
+
+    {@ocaml[
+    [ "foo", "bar"; "x", "10"; "foo", "message" ]
+    ]}
+
+    That is the choice {{:https://camlworks.github.io/dream/} Dream}
+    has made. However, if you are using a framework that makes a
+    different choice — such as {{:https://ocaml.org/p/uri/latest}
+    Uri}'s, which uses an associative list of [string * string list] —
+    you can use the {!val:Param.from_nested_list} function to convert
+    to that representation.
+
+    Unlike {!type:path} fragments, where order matters, we'd like to
+    be able to process query parameters independently. To do this, the
+    {!type:param} type defines a validation rule on a set of query
+    parameters to produce a specific value.
+
+    Behind the scenes, validation uses the
+    {{:https://ocaml.org/p/pidgin/1.0.0/doc/pidgin/Pidgin/Check/index.html}
+    Pidgin library} to validate query parameters as if they were
+    records. By using the {!val:make_params} function, you can define
+    a query parameter validator. As for {!type:pattern}, you need to
+    give a validation function and a projection function (for link
+    generation).
+
+    {4 An example}
+
+    Let's imagine we want to describe a filtering strategy by author
+    and category:
+
+    {eof@ocaml[
+    module Filter = struct
+      type t =
+        { author : string
+        ; category : string
+        ; limit : int option
+        }
+
+      let param =
+           make_params
+             ~from_query:(fun fields ->
+               let open Pidgin.Check in
+               let+ author = req fields "author" string
+               and+ category = req fields "category" string
+               and+ limit = opt fields "limit" (int & Int.is_positive) in
+               { author; category; limit })
+             ~to_query:(fun { author; category; limit } ->
+               let all = [ "author", author; "category", category ] in
+               match limit with
+               | None -> all
+               | Some x -> ("limit", string_of_int x) :: all)
+               (* This is just for testing reason, you do not need, obviously,
+                  to disable ocamlformat here... *)
+               [@@ocamlformat "disable"]
+    end
+    ]eof}
+
+    We define [from_query], which uses a Pidgin record validator (you
+    can use the full Pidgin API for making fine-grained validators),
+    and a [to_query] function that returns an associative array. (We
+    do not return a Pidgin expression because that would be too
+    expressive for query parameters.)
+
+    Now, we can define a route that will use the filter:
+
+    {@ocaml[
+    let another_route = get [ s "books"; s "filter" ] Filter.param
+    ]}
+
+    And when we try to generate the corresponding link:
+
+    {@ocaml[
+    # html_href another_route []
+         {author = "John Doe"; category = "Novel"; limit = None} ;;
+    - : string = "/books/filter?author=John Doe&category=Novel"
+    ]}
+
+    {@ocaml[
+    # html_href another_route []
+         {author = "John Doe"; category = "Novel"; limit = Some 42} ;;
+    - : string = "/books/filter?limit=42&author=John Doe&category=Novel"
+    ]}
+
+    And during the routing phase, query parameters will be validated
+    and given to the controller.
+
+    {4 Simple API}
+
+    Although the manual definition of a validator is very flexible and
+    allows you to describe a wide variety of scenarios, sometimes you
+    might want a more direct and straightforward approach. For that,
+    there is a slightly simpler (and composable) API available.
+
+    In fact, there are functions that allow you to process query
+    parameters one by one, for example:
+
+    - {!val:string_param} which takes a string as an argument—the
+      key—and checks whether a string associated with the given key
+      exists.
+
+    - {!val:string_opt_param} which takes a string as an argument—the
+      key—and checks whether a string associated with the given key
+      exists (and wrap it into an option).
+
+    - along with {!val:int_param}, {!val:float_param},
+      {!val:char_param}, {!val:bool_param}.
+
+    - and {!val:int_opt_param}, {!val:float_opt_param},
+      {!val:char_opt_param}, {!val:bool_opt_param}.
+
+    By default, these validators support only one query parameter, for
+    example:
+
+    {@ocaml[
+      # html_href
+         (get [ s "books"; s "filter" ] (string_param "author"))
+         [] "Xavier" ;;
+      - : string = "/books/filter?author=Xavier"
+    ]}
+
+    However, using the [&] operator, they can be combined. In fact,
+    [&] composes two arbitrary validators. For example, the original
+    example could be reproduced only in this way:
+
+    {@ocaml[
+      # html_href
+         (get [ s "books"; s "filter" ]
+         (string_param "author"
+            & string_param "category"
+            & int_opt_param "limit"))
+         [] ("Xavier", ("novel", Some 43)) ;;
+      - : string = "/books/filter?author=Xavier&category=novel&limit=43"
+    ]}
+
+    Similarly, there is [/] that uses [Either] to construct a sum.
+
+    {3 External routes}
+
+    In our view, route description tools provide a robust and
+    well-defined approach to describing access points to resources. It
+    would therefore be a shame to limit ourselves to internal links.
+
+    Fortunately, the {!val:global} function allows you to convert a
+    local route into a global route. For example, here is a very
+    small, minimalist (and partial) binding for the
+    {{:https://jsonplaceholder.typicode.com/} JsonPlaceholder} API:
+
+    {@ocaml[
+    module Json_api = struct
+      open Highway
+
+      let base_url = "https://jsonplaceholder.typicode.com"
+
+      let all_posts =
+        global base_url (get [ s "posts" ] ignore_params)
+
+      let one_post =
+        global base_url (get [ s "posts"; int ] ignore_params)
+
+      let one_post_with_comments =
+        global base_url (get [ s "posts"; int; s "comments" ] ignore_params)
+
+      let comments =
+        global base_url (get [ s "comments" ] (int_opt_param "postId"))
+
+    end
+    (* This is just for testing reason, you do not need, obviously,
+       to disable ocamlformat here... *)
+    [@@ocamlformat "disable"]
+    ]}
+
+    You {b cannot} associate global routes with services (which makes
+    sense), but you can still use them to generate links:
+
+    {@ocaml[
+    # [ html_href Json_api.all_posts [] ()
+      ; html_href Json_api.one_post [1] ()
+      ; html_href Json_api.one_post_with_comments [1] ()
+      ; html_href Json_api.comments [] None
+      ; html_href Json_api.comments [] (Some 1)
+      ] ;;
+    - : string list =
+    ["https://jsonplaceholder.typicode.com/posts";
+     "https://jsonplaceholder.typicode.com/posts/1";
+     "https://jsonplaceholder.typicode.com/posts/1/comments";
+     "https://jsonplaceholder.typicode.com/comments";
+     "https://jsonplaceholder.typicode.com/comments?postId=1"]
+    ]}
+
+    There is therefore no particular reason not to describe your
+    external endpoints using this API, which provides typed functions. *)
 
 (** {1 Types}
 

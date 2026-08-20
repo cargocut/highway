@@ -141,3 +141,7 @@ val to_pidgin : (string * string) list -> Pidgin.Repr.t
 
 (** [concat_query_params list] normalize a query param string. *)
 val concat_query_params : (string * string) list -> string option
+
+(** [from_nested_list list] convert a nested representation to a
+    flatten one. *)
+val from_nested_list : ('a * 'b list) list -> ('a * 'b) list
