@@ -394,7 +394,161 @@
     ]}
 
     There is therefore no particular reason not to describe your
-    external endpoints using this API, which provides typed functions. *)
+    external endpoints using this API, which provides typed functions.
+
+    {2 Describing services}
+
+    Now that we’ve looked at routes, let’s see how to associate
+    behaviour with them. In other words, how to associate a controller
+    with a route. In Highway terminology (also inspired by
+    {{:https://ocsigen.org} Ocsigen}), this involves describing a
+    {!type:service}.
+
+    Creating a service is done using the {!val:service} function:
+
+    {@ocaml[
+    # service ;;
+    - : ?middleware:('request, 'response) middleware ->
+        ?precondition:('request -> bool) ->
+        ?postcondition:('args args -> 'param_ty -> 'request -> bool) ->
+        context:('ctx, 'request, 'response) context ->
+        route:(local, meth, 'cstr, 'param_ty, 'args) route ->
+        ('args args -> 'param_ty -> 'ctx -> ('request, 'response) handler) ->
+        ('request, 'response) service
+    = <fun>
+    ]}
+
+    For now, we won’t worry about the specific settings; we’ll get
+    straight to the point by using a pre-configured version of
+    [service]:
+
+    {@ocaml[
+    # let simple_service ~route handler =
+        service ~context:no_context ~route handler ;;
+    val simple_service :
+      route:(local, meth, 'a, 'b, 'c) route ->
+      ('c args -> 'b -> unit -> ('d, 'e) handler) -> ('d, 'e) service = <fun>
+    ]}
+
+    So the main idea of [Services] is to associate a {!type:route}
+    with an handler. As we can see in the signature of
+    [simple_service], a handler is a function that takes the following
+    form:
+
+    {@ocaml skip[
+    fun [ args_from_route_path ] query_parameter context request -> a_response
+    ]}
+
+    Here, since our [simple_service] is fixed to {!val:no_context} the
+    [context] parameter will be [unit].
+
+    As we have said on numerous occasions, Highway is HTTP
+    server-agnostic, so for the purposes of this tutorial, let’s
+    assume that a [response] is a [string] and define a dummy
+    [request] type, and let’s create our first service:
+
+    {@ocaml[
+    type request =
+      { user : string option
+      ; query : (string * string) list
+      }
+
+    let req ?user ?(query = []) () = { user; query }
+    ]}
+
+    {@ocaml[
+    let a_first_service =
+      simple_service ~route:Routes.home (fun [] () () _req ->
+        "Welcome to my website")
+    ;;
+    ]}
+
+    Let's write an other service with a more complicated route:
+
+    {@ocaml[
+    let an_other_service =
+      simple_service ~route:Routes.hello_to (fun [ name ] () () _req ->
+        "Hello world, Hello" ^ name)
+    ;;
+    ]}
+
+    And let’s write one final service that utilises query parameters:
+
+    {@ocaml[
+    let yet_another_service =
+      simple_service
+        ~route:another_route
+        (fun [] { author; category; limit } () _req ->
+           [ "Author: " ^ author
+           ; "Category: " ^ category
+           ; ("Limit: "
+              ^ Option.(value ~default:"none" (map string_of_int limit)))
+           ]
+           |> String.concat "\n")
+    ;;
+    ]}
+
+    As we can see, the callback function – the handler – is heavily
+    dependent on the route. This allows us to be guided by the type
+    system.
+
+    {3 Middleware}
+
+    A {!type:middleware} is a composable function that wraps a web handler to
+    process a request before it reaches the handler and/or a response
+    after it returns.
+
+    They are applied once routing has been completed (and therefore do
+    not allow the user to proceed to the next page). Let’s imagine,
+    for example, that we want to have services that are only
+    accessible if the user is logged in:
+
+    {@ocaml[
+    (* An helper for errors *)
+    let error_response ?message code _req =
+      "Error "
+      ^ string_of_int code
+      ^
+      match message with
+      | None -> ""
+      | Some message -> "\n" ^ message
+    ;;
+
+    let user_required next_handler ({ user; _ } as req) =
+      match user with
+      | None -> error_response ~message:"You need to be logged" 401 req
+      | Some _ -> next_handler req
+    ;;
+    ]}
+
+    Now, our function is a {!type:middleware}; if the user is present
+    in the request, the programme continues; otherwise, an error
+    response is returned. We can now use it in a service definition:
+
+    {@ocaml[
+    let yet_another_service =
+      service
+        ~middleware:user_required
+        ~context:no_context
+        ~route:another_route
+        (fun [] { author; category; limit } () _req ->
+           [ "Author: " ^ author
+           ; "Category: " ^ category
+           ; ("Limit: "
+              ^ Option.(value ~default:"none" (map string_of_int limit)))
+           ]
+           |> String.concat "\n")
+    ;;
+    ]}
+
+    Now, if the service is running but the user is not logged in, the
+    application will return an error response. It is possible to
+    combine several middleware components sequentially using
+    {!val:middleware_list}.
+
+    {3 Context}
+
+    {2 Performing routing} *)
 
 (** {1 Types}
 
