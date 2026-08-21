@@ -1,0 +1,50 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build-and-test:
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+        ocaml-compiler:
+          - 5
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Tree
+        uses: actions/checkout@v4
+
+      - name: Set-up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+
+      - run: opam install . --deps-only --with-test
+      - run: opam exec -- dune build
+      - run: opam exec -- dune runtest
+
+  lint-fmt:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ ubuntu-latest ]
+        ocaml-compiler: [ ocaml-base-compiler.5.4.0 ]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Tree
+        uses: actions/checkout@v4
+
+      - name: Set-up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+      - uses: ocaml/setup-ocaml/lint-fmt@v3
