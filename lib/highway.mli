@@ -494,9 +494,10 @@
 
     {3 Middleware}
 
-    A {!type:middleware} is a composable function that wraps a web handler to
-    process a request before it reaches the handler and/or a response
-    after it returns.
+    A {!type:middleware} is a composable function that wraps a web
+    handler to process a request before it reaches the handler and/or
+    a response after it returns. They can provide capabilities, guards
+    etc.
 
     They are applied once routing has been completed (and therefore do
     not allow the user to proceed to the next page). Let’s imagine,
@@ -548,7 +549,128 @@
 
     {3 Context}
 
-    {2 Performing routing} *)
+    A {!type:context} is a “type of middleware” that is applied and
+    allows you to retrieve a value to pass to the handler
+    function. For example, if instead of just verifying, via
+    middleware, that a user is registered (using our test request), we
+    also want to “pass it to our controller,” we could describe a
+    context provider this way:
+
+    {@ocaml[
+    let provide_user handler ({ user; _ } as req) =
+      match user with
+      | None -> error_response ~message:"You need to be logged" 401 req
+      | Some user -> handler user req
+    ;;
+    ]}
+
+    It's roughly the same as our [user_required] middleware, except
+    that this time, the user is “sent” to the next handler (which is
+    our service's controller), which will change the nature of the
+    [slot] (previously [()]) located between the query parameter and
+    the request..
+
+    {@ocaml[
+    let yet_another_service =
+      service
+        ~middleware:user_required
+        ~context:provide_user
+        ~route:another_route
+        (fun [] { author; category; limit } provided_user _req ->
+           [ "Author: " ^ author
+           ; "Category: " ^ category
+           ; ("Limit: "
+              ^ Option.(value ~default:"none" (map string_of_int limit)))
+           ; "Hello " ^ provided_user
+           ]
+           |> String.concat "\n")
+    ;;
+    ]}
+
+    If you don't need context, you can simply use the
+    {!val:no_context} function, which returns [unit] as the context
+    (as in our definition of [simple_service]).
+
+    {3 Conditions}
+
+    In addition, a service can “hold” two conditions: [precondition]
+    and [postcondition], which are two functions that return Boolean
+    values. If either of these functions returns [false], the router
+    moves on to analyzing the route for the next service. The
+    conditions therefore allow the router to skip the route currently
+    being analyzed during the routing process.
+
+    This is convenient because once a service has booted (i.e., once
+    it has been selected in the routing), it is not possible to move
+    on to the next route from the controller—but why are there two
+    levels of conditions?
+
+    - [precondition] is a function ['request -> bool], It takes action
+      immediately after verifying that the methods match, which is why
+      it uses only the [request] as the subject of observation.
+
+    - [postcondition] is a function
+      ['args args -> 'param -> 'request -> bool] It runs after the
+      {!type:path} fragments have been parsed
+      and after the query parameters have been validated. It provides
+      additional context to help determine whether to validate the
+      route. It runs immediately before the middleware (and the context)
+      are applied.
+
+    By default, both conditions always evaluate to [true].
+
+    {2 Performing routing}
+
+    Now that we've seen how to describe {!type:route} and
+    {!type:service} (and how to constrain them using
+    {!type:middleware}, {!type:context}, and conditions), we'll take a
+    broad look at how routing works.
+
+    To route, we use the {!val:dispatch} function, which has the
+    following type:
+
+    {@ocaml[
+    # let dispatch = Service.dispatch ;;
+    val dispatch :
+      given_method:meth ->
+      given_path:string list ->
+      given_query_params:(string * string) list ->
+      ('a, 'b) service list -> ('a, 'b) middleware = <fun>
+    ]}
+
+    For reasons of generality (once again), the function assumes that
+    query parameters have been normalized as described in the previous
+    sections and that the path is a list of strings; for example,
+    [a/b/foo] becomes [[“a”; ‘b’; “foo”]]. It then takes a list of
+    services as an argument and returns a {!type:middleware}. In other
+    words, if the function doesn't find a route, it passes control to
+    the next handler (which could be another piece of middleware).
+
+    {3 Analysis of a candidate service}
+
+    Here is a general overview of how the router determines whether a
+    service is a candidate or not:
+
+    - Checks whether the service's method is the same as the one
+      provided by [given_method].
+    - Checks the [precondition].
+    - Checks the {!type:path} using [given_path] (and extract path
+      values into an {!type:args}).
+    - Checks the {!type:param} using [given_query_params].
+    - Checks the [postcondition].
+
+    At this stage, the service is validated as a result and the router
+    apply middleware and context:
+
+    - Apply the [context] of the service.
+    - Apply the [middleware] (if it exists).
+
+    {b At this time, Highway does not “intelligently” sort service
+    routes.}
+
+    There you go—you've just gotten a quick overview of the various
+    features offered by Highway, just like a {b generic router}. Here
+    is the full API. *)
 
 (** {1 Types}
 
