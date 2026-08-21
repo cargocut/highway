@@ -10,6 +10,73 @@
 > and `request` so that it can, broadly speaking, be adapted to any
 > framework in the OCaml ecosystem.
 
+Highway allows you to define typed routes (whose query parameters are
+validated by [Pidgin](https://github.com/cargocut/pidgin)) that can:
+- be used to generate links in a type-safe manner
+- build services (controllers) and route them
+
+```ocaml
+open Highway
+```
+
+First let's define a few routes:
+
+```ocaml
+module Routes = struct
+  let home = get [] ignore_params
+  let hello = get [ s "hello" ] ignore_params
+  let hello_to = get [ s "hello"; string ] (bool_opt_param "shout")
+end
+```
+
+Next, we'll associate these routes with controllers by defining
+services:
+
+```ocaml
+module Services = struct
+  let a_href route args params message =
+    "<a href=\"" ^ html_href route args params ^ "\">" ^ message ^ "</a>"
+  ;;
+
+  let home =
+    service ~context:no_context ~route:Routes.home (fun [] () () _request ->
+      "Welcome to my website. Here is a page: "
+      ^ a_href Routes.hello [] () "<button>Hello Page!</button>"
+      ^ "and here is another page: "
+      ^ a_href
+          Routes.hello_to
+          [ "Highway" ]
+          (Some true)
+          "<button>Hello to Highway!</button>")
+
+  let hello =
+    service ~context:no_context ~route:Routes.hello (fun [] () () _request ->
+      "Hello, World... " ^ a_href Routes.home [] () "Back to home")
+
+  let hello_to =
+    service
+      ~context:no_context
+      ~route:Routes.hello_to
+      (fun [ name ] shout () _request ->
+         let is_shout = Option.value ~default:false shout in
+         let name = if is_shout then String.uppercase_ascii name else name in
+         "Hello " ^ name ^ "... " ^ a_href Routes.home [] () "Back to home")
+end
+```
+
+And now we can route our various services:
+
+```ocaml
+let dispatch ~given_method ~given_path ~given_query_params () =
+  dispatch
+    ~given_method
+    ~given_path
+    ~given_query_params
+    Services.[ home; hello; hello_to ]
+```
+
+Please refer to the documentation for the `highway.mli` module for more information.
+
 
 ## Acknowledgement
 
