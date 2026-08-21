@@ -47,15 +47,9 @@ let dispatch
     | Service
         { middleware; route; context; handler; precondition; postcondition }
       :: others ->
-      if precondition request
+      if Route.has_method given_method route && precondition request
       then (
-        match
-          Route.extract_values
-            ~given_method
-            ~given_path
-            ~given_query_params
-            route
-        with
+        match Route.extract_values ~given_path ~given_query_params route with
         | Some (args, param) ->
           if postcondition args param request
           then (

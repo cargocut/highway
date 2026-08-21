@@ -181,10 +181,13 @@ val target'
 
 (** {1 Extracting values} *)
 
+(** [has_method given_meth route] check if the given [route] has the
+    [given_meth]. *)
+val has_method : Method.t -> ('scope, Method.t, _, _, _) t -> bool
+
 (** Extract values for routing. *)
 val extract_values
   :  (local, Method.t, 'cstr, 'param_ty, 'args) t
-  -> given_method:Method.t
   -> given_path:string list
   -> given_query_params:(string * string) list
   -> ('args Args.t * 'param_ty) option

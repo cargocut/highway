@@ -135,17 +135,19 @@ let base_url = function
   | Global (x, _) -> x
 ;;
 
+let has_method : type scope. Method.t -> (scope, _, _, _, _) t -> _ =
+  fun given_method -> function
+  | Local { meth; _ } | Global (_, { meth; _ }) ->
+    Method.equal given_method meth
+;;
+
 let extract_values
-      (Local { meth; path; query_params })
-      ~given_method
+      (Local { path; query_params; _ })
       ~given_path
       ~given_query_params
   =
-  if Method.equal meth given_method
-  then (
-    let ( let* ) = Option.bind in
-    let* args = Path.from_list path given_path in
-    let* params = Param.from_query query_params given_query_params in
-    Some (args, params))
-  else None
+  let ( let* ) = Option.bind in
+  let* args = Path.from_list path given_path in
+  let* params = Param.from_query query_params given_query_params in
+  Some (args, params)
 ;;
