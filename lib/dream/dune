@@ -1,0 +1,4 @@
+(library
+ (name highway_dream)
+ (public_name highway-dream)
+ (libraries dream highway))

@@ -38,4 +38,12 @@
   (ocp-indent :with-dev-setup)
   (merlin :with-dev-setup)
   (ocaml-lsp-server :with-dev-setup)))
- 
+
+(package
+ (name highway-dream)
+ (synopsis "Use Highway withing Dream Application")
+ (description "Use Highway withing Dream Application")
+ (depends
+  (ocaml (>= 5.0.0))
+  (highway (= :version))
+   (dream (>= 1.0.0~alpha8))))
