@@ -17,7 +17,7 @@ type ('constraints, 'ty) t =
   | Nothing : (nothing, unit) t
   | Something : 'a device -> (something, 'a) t
 
-let invmap (Something a) from_a to_a =
+let invmap from_a to_a (Something a) =
   let from_query x = x |> a.from_query |> Result.map from_a
   and to_query x = x |> to_a |> a.to_query in
   Something { from_query; to_query }

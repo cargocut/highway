@@ -59,8 +59,8 @@ val from_hole : key:string -> 'a Hole.t -> (something, 'a) t
      ([key=hole_value]) from a {!type:Hole.t}. *)
 val from_opt_hole : key:string -> 'a Hole.t -> (something, 'a option) t
 
-(** [invmap device f g] map from [a] to [b]. *)
-val invmap : (something, 'a) t -> ('a -> 'b) -> ('b -> 'a) -> (something, 'b) t
+(** [invmap f g device] map from [a] to [b]. *)
+val invmap : ('a -> 'b) -> ('b -> 'a) -> (something, 'a) t -> (something, 'b) t
 
 (** {1 Validate params} *)
 
