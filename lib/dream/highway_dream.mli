@@ -24,6 +24,10 @@ type service = (request, response) Highway.service
     next handler). *)
 val dispatch : service list -> middleware
 
+(**[handle_dispatch services] is like {!val:dispatch} but as an
+   {!type:handler} instead of a {!type:middleware}. *)
+val handle_dispatch : service list -> handler
+
 (** {1 Helpers} *)
 
 (** [redirect ?status ?code ?headers ?anchor ?extra_params route args params]

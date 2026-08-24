@@ -31,6 +31,8 @@ let adapt_target target =
   | "" :: "" :: xs | "" :: xs | xs -> xs
 ;;
 
+let not_found _ = Dream.respond ~status:`Not_Found ""
+
 let dispatch services fallback request =
   match adapt_method (Dream.method_ request) with
   | None -> fallback request
@@ -45,6 +47,8 @@ let dispatch services fallback request =
       fallback
       request
 ;;
+
+let handle_dispatch service request = dispatch service not_found request
 
 let redirect ?status ?code ?headers ?anchor ?extra_params route args param req =
   let target = Highway.html_href ?anchor ?extra_params route args param in
