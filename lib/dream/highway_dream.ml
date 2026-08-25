@@ -28,7 +28,7 @@ let adapt_method : Dream.method_ -> Highway.meth option = function
 
 let adapt_target target =
   match String.split_on_char '/' target with
-  | "" :: xs | xs -> xs
+  | "" :: "" :: xs | "" :: xs | xs -> xs
 ;;
 
 let dispatch services fallback request =
