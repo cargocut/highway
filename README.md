@@ -77,6 +77,18 @@ let dispatch ~given_method ~given_path ~given_query_params () =
 
 Please refer to the documentation for the `highway.mli` module for more information.
 
+## Adapters
+
+As mentioned in the introduction, the goal of Highway is to be
+agnostic, and thus to be composable with other, more ambitious
+libraries. Here is a list of the implemented bindings.
+
+- [Dream](https://camlworks.github.io/dream/#forms): the package
+  `highway-dream` provides primitives for using Highway as a router
+  (or as middleware) in a Dream application.
+  
+We hope more adapters will be available soon!
+
 
 ## Acknowledgement
 
