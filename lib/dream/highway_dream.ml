@@ -27,8 +27,9 @@ let adapt_method : Dream.method_ -> Highway.meth option = function
 ;;
 
 let adapt_target target =
-  match String.split_on_char '/' target with
-  | "" :: "" :: xs | "" :: xs | xs -> xs
+  let t, _ = Dream.split_target target in
+  match Dream.from_path t with
+  | "" :: xs | xs -> xs
 ;;
 
 let not_found _ = Dream.respond ~status:`Not_Found ""
