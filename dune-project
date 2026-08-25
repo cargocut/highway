@@ -46,4 +46,6 @@
  (depends
   (ocaml (>= 5.0.0))
   (highway (= :version))
-   (dream (>= 1.0.0~alpha8))))
+  (dream (>= 1.0.0~alpha8))
+  (alcotest (and :with-test (>= 1.9.1)))
+  (mdx (and :with-test  (>= 2.6.0)))))
