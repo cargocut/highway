@@ -164,22 +164,11 @@
     ;;
     ]}
 
-    We will use {!val:html_action'} since it is a [POST] route that
+    If we use {!val:html_action'} since it is a [POST] route that
     disallows query params. First, we can see the error if we did not
-    give a proper list of path fragment:
-
-    {@ocaml[
-    # html_action'
-        a_route
-        [42; "foo"; 3.14] () ;;
-    Line 3, characters 21-22:
-    Error: The constructor [] has type Void.t args
-           but an expression was expected of type (bool -> int -> Void.t) args
-           Type Void.t is not compatible with type bool -> int -> Void.t
-    ]}
-
-    The error indicates that the list ends prematurely and that some
-    fragments are missing during compilation.
+    give a proper list of path fragment. The error indicates that the
+    list ends prematurely and that some fragments are missing during
+    compilation.
 
     {@ocaml[
     # html_action'
