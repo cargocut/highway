@@ -25,7 +25,7 @@
  (synopsis "A dead-simple agnostic HTTP router")
  (description "A simple framework-agnostic typed HTTP router")
  (depends
-  (ocaml (>= 4.08.0))
+  (ocaml (>= 5.0.0))
   (pidgin (>= 1.0.0))
   
   ;; test setup
@@ -44,7 +44,7 @@
  (synopsis "Use Highway withing Dream Application")
  (description "Use Highway withing Dream Application")
  (depends
-  (ocaml (>= 4.08.0))
+  (ocaml (>= 5.0.0))
   (highway (= :version))
   (dream (>= 1.0.0~alpha8))
   (alcotest (and :with-test (>= 1.9.1)))

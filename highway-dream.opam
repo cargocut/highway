@@ -22,7 +22,7 @@ homepage: "https://github.com/cargocut/highway"
 bug-reports: "https://github.com/cargocut/highway/issues"
 depends: [
   "dune" {>= "3.21"}
-  "ocaml" {>= "4.08.0"}
+  "ocaml" {>= "5.0.0"}
   "highway" {= version}
   "dream" {>= "1.0.0~alpha8"}
   "alcotest" {with-test & >= "1.9.1"}
