@@ -31,9 +31,9 @@ open struct
       let open Pidgin.Check in
       let+ title = req fields "title" string
       and+ length = req fields "length" int
-      and+ chars = opt fields "chars" (list_of char / (char $ List.singleton))
+      and+ chars = opt fields "chars" (list_of char / (char $ fun x -> [ x ]))
       and+ aliases =
-        opt fields "aliases" (list_of string / (string $ List.singleton))
+        opt fields "aliases" (list_of string / (string $ fun x -> [ x ]))
       in
       make ~title ~length ?chars ?aliases ()
     ;;
