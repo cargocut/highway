@@ -9,7 +9,7 @@ jobs:
 
   build-and-test:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os:
           - ubuntu-latest
