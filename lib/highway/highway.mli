@@ -267,13 +267,13 @@
     {@ocaml[
     # html_href another_route []
          {author = "John Doe"; category = "Novel"; limit = None} ;;
-    - : string = "/books/filter?author=John Doe&category=Novel"
+    - : string = "/books/filter?author=John+Doe&category=Novel"
     ]}
 
     {@ocaml[
     # html_href another_route []
          {author = "John Doe"; category = "Novel"; limit = Some 42} ;;
-    - : string = "/books/filter?limit=42&author=John Doe&category=Novel"
+    - : string = "/books/filter?limit=42&author=John+Doe&category=Novel"
     ]}
 
     And during the routing phase, query parameters will be validated

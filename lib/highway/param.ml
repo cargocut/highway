@@ -124,10 +124,10 @@ let to_pidgin list =
     (List.fold_left
        (fun map (k, v) ->
           M.update
-            k
+            (Pct.decode ~plus_as_space:true k)
             (function
-              | None -> Some [ v ]
-              | Some xs -> Some (v :: xs))
+              | None -> Some [ Pct.decode ~plus_as_space:true v ]
+              | Some xs -> Some (Pct.decode ~plus_as_space:true v :: xs))
             map)
        M.empty
        list)
@@ -156,13 +156,19 @@ let to_query_params : type cstr a. (cstr, a) t -> a -> (string * string) list =
   | Something { to_query; _ } -> to_query subject
 ;;
 
+let encode_query_param k v =
+  Pct.(encode ~is_allowed:is_query_component k)
+  ^ "="
+  ^ Pct.(encode ~is_allowed:is_query_component v)
+;;
+
 let concat_query_params = function
   | [] -> None
   | (k, v) :: xs ->
     Some
       (List.fold_left
-         (fun result (k, v) -> result ^ "&" ^ k ^ "=" ^ v)
-         (k ^ "=" ^ v)
+         (fun result (k, v) -> result ^ "&" ^ encode_query_param k v)
+         (encode_query_param k v)
          xs)
 ;;
 
