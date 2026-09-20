@@ -1123,6 +1123,7 @@ include module type of Infix (** @inline *)
     the main module). *)
 
 module Void = Void
+module Pct = Pct
 module Sigs = Sigs
 module Args = Args
 module Hole = Hole
