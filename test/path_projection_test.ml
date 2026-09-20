@@ -106,9 +106,61 @@ open struct
          in
          check (list string) "should be equal" expected computed)
   ;;
+
+  let projection_6 =
+    test_case
+      "Project an URL with a lot of arguments and catenation"
+      `Quick
+      (fun () ->
+         let path =
+           let open Highway in
+           let open Path in
+           let open Pattern in
+           [ s "foo bar"; string; s "baz" ]
+           ++ [ int; bool; char; float; string; s "foobar" ]
+           ++ [ int; int; int; Positive_int.pattern ]
+         in
+         let expected =
+           [ "foo%20bar"
+           ; "bar"
+           ; "baz"
+           ; "42"
+           ; "true"
+           ; "c"
+           ; "3.14"
+           ; "fin%20du%20monde"
+           ; "foobar"
+           ; "1"
+           ; "2"
+           ; "3"
+           ; "4"
+           ]
+         and computed =
+           Highway.Path.to_list
+             path
+             [ "bar"
+             ; 42
+             ; true
+             ; 'c'
+             ; 3.14
+             ; "fin du monde"
+             ; 1
+             ; 2
+             ; 3
+             ; Positive_int.mk 4
+             ]
+         in
+         check (list string) "should be equal" expected computed)
+  ;;
 end
 
 let cases =
   ( "Path Projection"
-  , [ projection_1; projection_2; projection_3; projection_4; projection_5 ] )
+  , [ projection_1
+    ; projection_2
+    ; projection_3
+    ; projection_4
+    ; projection_5
+    ; projection_6
+    ] )
 ;;
