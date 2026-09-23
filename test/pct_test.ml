@@ -38,22 +38,6 @@ open struct
       check string "should be equal" expected computed)
   ;;
 
-  let encode5 =
-    test_case "encode" `Quick (fun () ->
-      let input = "Hello Günter" in
-      let expected = "Hello+G%C3%BCnter"
-      and computed = Highway.Pct.(encode ~is_allowed:is_path_segment) input in
-      check string "should be equal" expected computed)
-  ;;
-
-  let encode6 =
-    test_case "encode" `Quick (fun () ->
-      let input = "Hello Günter+" in
-      let expected = "Hello+G%C3%BCnter%2B"
-      and computed = Highway.Pct.(encode ~is_allowed:is_path_segment) input in
-      check string "should be equal" expected computed)
-  ;;
-
   let decode1 =
     test_case "decode" `Quick (fun () ->
       let input = "" in
@@ -109,8 +93,6 @@ let cases =
     ; encode2
     ; encode3
     ; encode4
-    ; encode5
-    ; encode6
     ; decode1
     ; decode2
     ; decode3

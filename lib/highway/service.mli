@@ -52,13 +52,16 @@ val make_simple
     from a list based on a method and a path (represented as a list of
     strings). This makes it possible to build generic routers. *)
 
-(** [dispatch ~given_method ~given_path ~given_query_params services fallback]
-    is a {!module:Middleware} which selects a candidate service from a
-    list (based on the specified path and method; therefore, the order
-    matters). If no candidate is found, the function executes the
-    fallback. *)
+(** [dispatch ~given_method ~given_path ~given_query_params services fallback] is a
+    {!module:Middleware} which selects a candidate
+    service from a list (based on the specified path and method;
+    therefore, the order matters). If no candidate is found, the
+    function executes the fallback. By default, the function does not
+    perform any decoding (on path and query components) except if you
+    pass [~decode] flag. *)
 val dispatch
-  :  given_method:Method.t
+  :  ?decode:bool
+  -> given_method:Method.t
   -> given_path:string list
   -> given_query_params:(string * string) list
   -> ('request, 'response) t list

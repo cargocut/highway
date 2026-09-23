@@ -309,7 +309,7 @@ open struct
              ~chars:[ 'a'; 'Z' ]
              ~aliases:[ "xvw"; "xvw2 grm" ]
              ())
-      and computed = Highway.Param.from_query desc subject in
+      and computed = Highway.Param.from_query ~decode:true desc subject in
       check (option Desc.testable) "should be equal" expected computed)
   ;;
 end

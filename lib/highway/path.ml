@@ -27,14 +27,15 @@ let to_list path args =
   (path, args) |> aux []
 ;;
 
-let from_list path input =
+let from_list ?(decode = false) path input =
+  let decode x = if decode then Pct.decode x else x in
   let rec aux : type a. (a, Void.t) t * string list -> a Args.t option =
     function
     | [], [] -> Some []
     | Literal s :: ps, v :: xs ->
-      if String.equal s (Pct.decode v) then aux (ps, xs) else None
+      if String.equal s (decode v) then aux (ps, xs) else None
     | Hole hole :: ps, x :: xs ->
-      (match Hole.from_string hole (Pct.decode x) with
+      (match Hole.from_string hole (decode x) with
        | None -> None
        | Some k -> Option.bind (aux (ps, xs)) (fun ps -> Some Args.(k :: ps)))
     | [], _ | _ :: _, _ ->
