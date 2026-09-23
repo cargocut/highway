@@ -23,8 +23,7 @@ val decode : ?plus_as_space:bool -> string -> string
 (** Function for regular unreserved chars. *)
 val is_unreserved : char -> bool
 
-(** A suitable function for path segment. [plus_as_space] can replace
-    spaces by [+] instead of [%20]. *)
+(** A suitable function for path segment. *)
 val is_path_segment : char -> bool
 
 (** A suitable function for query components. *)
