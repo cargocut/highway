@@ -13,43 +13,38 @@ let unhex = function
 ;;
 
 let is_unreserved = function
-  | ('A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '-' | '.' | '_' | '~') as c ->
-    Some c
-  | _ -> None
+  | 'A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '-' | '.' | '_' | '~' -> true
+  | _ -> false
 ;;
 
-let is_path_segment ?(plus_as_space = false) c =
-  match is_unreserved c with
-  | Some c -> Some c
-  | None ->
-    (match c with
-     | ' ' when plus_as_space -> Some '+'
-     | '+' when plus_as_space -> None
-     | '!'
-     | '$'
-     | '&'
-     | '\''
-     | '('
-     | ')'
-     | '*'
-     | '+'
-     | ','
-     | ';'
-     | '='
-     | ':'
-     | '@' -> Some c
-     | _ -> None)
+let is_path_segment c =
+  if is_unreserved c
+  then true
+  else (
+    match c with
+    | '!'
+    | '$'
+    | '&'
+    | '\''
+    | '('
+    | ')'
+    | '*'
+    | '+'
+    | ','
+    | ';'
+    | '='
+    | ':'
+    | '@' -> true
+    | _ -> false)
 ;;
 
 let is_query_component c =
-  match is_unreserved c with
-  | Some c -> Some c
-  | None ->
-    (match c with
-     | '!' | '$' | '\'' | '(' | ')' | '*' | ',' | ':' | '@' | '/' | '?' ->
-       Some c
-     | ' ' -> Some '+'
-     | _ -> None)
+  if is_unreserved c
+  then true
+  else (
+    match c with
+    | '!' | '$' | '\'' | '(' | ')' | '*' | ',' | ':' | '@' | '/' | '?' -> true
+    | _ -> false)
 ;;
 
 let encode ~is_allowed s =
@@ -57,13 +52,13 @@ let encode ~is_allowed s =
   let () =
     String.iter
       (fun c ->
-         match is_allowed c with
-         | Some c -> Buffer.add_char buf c
-         | None ->
+         if is_allowed c
+         then Buffer.add_char buf c
+         else (
            let code = Char.code c in
            Buffer.add_char buf '%';
            Buffer.add_char buf hex.[code lsr 4];
-           Buffer.add_char buf hex.[code land 0x0f])
+           Buffer.add_char buf hex.[code land 0x0f]))
       s
   in
   Buffer.contents buf

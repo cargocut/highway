@@ -42,10 +42,7 @@ open struct
     test_case "encode" `Quick (fun () ->
       let input = "Hello Günter" in
       let expected = "Hello+G%C3%BCnter"
-      and computed =
-        Highway.Pct.(encode ~is_allowed:(is_path_segment ~plus_as_space:true))
-          input
-      in
+      and computed = Highway.Pct.(encode ~is_allowed:is_path_segment) input in
       check string "should be equal" expected computed)
   ;;
 
@@ -53,10 +50,7 @@ open struct
     test_case "encode" `Quick (fun () ->
       let input = "Hello Günter+" in
       let expected = "Hello+G%C3%BCnter%2B"
-      and computed =
-        Highway.Pct.(encode ~is_allowed:(is_path_segment ~plus_as_space:true))
-          input
-      in
+      and computed = Highway.Pct.(encode ~is_allowed:is_path_segment) input in
       check string "should be equal" expected computed)
   ;;
 
