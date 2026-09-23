@@ -25,10 +25,15 @@ val to_list : ('a, Void.t) t -> 'a Args.t -> string list
 
 (** {1 Interpret path} *)
 
-(** [from_list path input] calculates a list of arguments that match
-    the [path] for the given [input]. This is one of the building
-    blocks for creating a router. *)
-val from_list : ('a, Void.t) t -> string list -> 'a Args.t option
+(** [from_list path input] calculates a list of arguments that match the
+    [path] for the given [input]. This is one of the building blocks
+    for creating a router. By default, the function does not perform
+    any decoding except if you pass [~decode] flag. *)
+val from_list
+  :  ?decode:bool
+  -> ('a, Void.t) t
+  -> string list
+  -> 'a Args.t option
 
 (** {1 Misc} *)
 

@@ -111,10 +111,11 @@ let from_nested_list list =
   |> List.rev
 ;;
 
-let to_pidgin list =
+let to_pidgin ?(decode = false) list =
   (* NOTE: The purpose of this function is to provide a reasonable
      representation of query parameters as a [string * string] list in
      Pidgin representation. *)
+  let decode x = if decode then Pct.decode ~plus_as_space:true x else x in
   M.fold
     (fun key value acc ->
        match value with
@@ -124,10 +125,10 @@ let to_pidgin list =
     (List.fold_left
        (fun map (k, v) ->
           M.update
-            k
+            (decode k)
             (function
-              | None -> Some [ v ]
-              | Some xs -> Some (v :: xs))
+              | None -> Some [ decode v ]
+              | Some xs -> Some (decode v :: xs))
             map)
        M.empty
        list)
@@ -140,13 +141,19 @@ let to_pidgin list =
   |> Pidgin.Repr.record
 ;;
 
-let from_query : type cstr a. (cstr, a) t -> (string * string) list -> a option =
-  fun device params ->
+let from_query
+  : type cstr a.
+    ?decode:bool -> (cstr, a) t -> (string * string) list -> a option
+  =
+  fun ?(decode = false) device params ->
   match device, params with
   | Nothing, [] -> Some ()
   | Nothing, _ -> None
   | Something { from_query; _ }, xs ->
-    xs |> to_pidgin |> Pidgin.Check.record from_query |> Result.to_option
+    xs
+    |> to_pidgin ~decode
+    |> Pidgin.Check.record from_query
+    |> Result.to_option
 ;;
 
 let to_query_params : type cstr a. (cstr, a) t -> a -> (string * string) list =
@@ -156,13 +163,19 @@ let to_query_params : type cstr a. (cstr, a) t -> a -> (string * string) list =
   | Something { to_query; _ } -> to_query subject
 ;;
 
+let encode_query_param k v =
+  Pct.(encode ~is_allowed:is_query_component k)
+  ^ "="
+  ^ Pct.(encode ~is_allowed:is_query_component v)
+;;
+
 let concat_query_params = function
   | [] -> None
   | (k, v) :: xs ->
     Some
       (List.fold_left
-         (fun result (k, v) -> result ^ "&" ^ k ^ "=" ^ v)
-         (k ^ "=" ^ v)
+         (fun result (k, v) -> result ^ "&" ^ encode_query_param k v)
+         (encode_query_param k v)
          xs)
 ;;
 

@@ -27,7 +27,7 @@
  (depends
   (ocaml (>= 5.0.0))
   (pidgin (>= 1.0.0))
-  
+
   ;; test setup
   (alcotest (and :with-test (>= 1.9.1)))
   (mdx (and :with-test  (>= 2.6.0)))

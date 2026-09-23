@@ -18,22 +18,24 @@ let to_list path args =
   let rec aux : type a. string list -> (a, Void.t) t * a Args.t -> string list =
     fun acc -> function
       | [], [] -> List.rev acc
-      | Literal s :: ps, xs -> aux (s :: acc) (ps, xs)
+      | Literal s :: ps, xs ->
+        aux (Pct.(encode ~is_allowed:is_path_segment) s :: acc) (ps, xs)
       | Hole hole :: ps, v :: xs ->
         let s = Hole.to_string hole v in
-        aux (s :: acc) (ps, xs)
+        aux (Pct.(encode ~is_allowed:is_path_segment) s :: acc) (ps, xs)
   in
   (path, args) |> aux []
 ;;
 
-let from_list path input =
+let from_list ?(decode = false) path input =
+  let decode x = if decode then Pct.decode x else x in
   let rec aux : type a. (a, Void.t) t * string list -> a Args.t option =
     function
     | [], [] -> Some []
     | Literal s :: ps, v :: xs ->
-      if String.equal s v then aux (ps, xs) else None
+      if String.equal s (decode v) then aux (ps, xs) else None
     | Hole hole :: ps, x :: xs ->
-      (match Hole.from_string hole x with
+      (match Hole.from_string hole (decode x) with
        | None -> None
        | Some k -> Option.bind (aux (ps, xs)) (fun ps -> Some Args.(k :: ps)))
     | [], _ | _ :: _, _ ->

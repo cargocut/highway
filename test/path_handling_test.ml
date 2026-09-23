@@ -131,7 +131,7 @@ open struct
         let open Pattern in
         [ s "foo"; string; s "baz" ]
         ++ [ int; bool; char; float; string; s "foobar" ]
-        ++ [ int; int; int; opt ~empty:"<none>" Hole.int ]
+        ++ [ int; int; int; opt ~empty:"$none" Hole.int ]
       and input =
         List.
           [ "foo"
@@ -146,7 +146,7 @@ open struct
           ; "1"
           ; "2"
           ; "3"
-          ; "<none>"
+          ; "$none"
           ]
       in
       match Highway.Path.from_list path input with

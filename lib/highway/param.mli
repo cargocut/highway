@@ -65,8 +65,13 @@ val invmap : ('a -> 'b) -> ('b -> 'a) -> (something, 'a) t -> (something, 'b) t
 (** {1 Validate params} *)
 
 (** [from_query param assoc_list] try to validate and extract the
-    [assoc_list] using [param]. *)
-val from_query : ('cstrs, 'ty) t -> (string * string) list -> 'ty option
+    [assoc_list] using [param]. By default, the function does not
+    perform any decoding except if you pass [~decode] flag. *)
+val from_query
+  :  ?decode:bool
+  -> ('cstrs, 'ty) t
+  -> (string * string) list
+  -> 'ty option
 
 (** {1 Render params} *)
 
@@ -135,9 +140,10 @@ include module type of Infix
 
 (** {1 Misc} *)
 
-(** [to_pidgin] Converts a list of query parameter mappings into a
-    valid Pidgin object.*)
-val to_pidgin : (string * string) list -> Pidgin.Repr.t
+(** [to_pidgin] Converts a list of query parameter mappings into a valid
+    Pidgin object. By default, the function does not perform any
+    decoding except if you pass [~decode] flag. *)
+val to_pidgin : ?decode:bool -> (string * string) list -> Pidgin.Repr.t
 
 (** [concat_query_params list] normalize a query param string. *)
 val concat_query_params : (string * string) list -> string option

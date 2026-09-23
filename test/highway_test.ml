@@ -13,5 +13,6 @@ let () =
     ; Route_projection_test.cases
     ; Routing_test.cases
     ; Rw_example_test.cases
+    ; Pct_test.cases
     ]
 ;;

@@ -267,13 +267,13 @@
     {@ocaml[
     # html_href another_route []
          {author = "John Doe"; category = "Novel"; limit = None} ;;
-    - : string = "/books/filter?author=John Doe&category=Novel"
+    - : string = "/books/filter?author=John%20Doe&category=Novel"
     ]}
 
     {@ocaml[
     # html_href another_route []
          {author = "John Doe"; category = "Novel"; limit = Some 42} ;;
-    - : string = "/books/filter?limit=42&author=John Doe&category=Novel"
+    - : string = "/books/filter?limit=42&author=John%20Doe&category=Novel"
     ]}
 
     And during the routing phase, query parameters will be validated
@@ -621,6 +621,7 @@
     {@ocaml[
     # let dispatch = Service.dispatch ;;
     val dispatch :
+      ?decode:bool ->
       given_method:meth ->
       given_path:string list ->
       given_query_params:(string * string) list ->
@@ -1082,9 +1083,12 @@ val service
 
 (** [dispatch ~given_method ~give_path ~given_query_params services]
     describes a {!type:middleware} that selects a service from a given
-    list (or falls back to the next middleware). *)
+    list (or falls back to the next middleware). By default, the
+    function does not perform any decoding (on path and query
+    components) except if you pass [~decode] flag.*)
 val dispatch
-  :  given_method:meth
+  :  ?decode:bool
+  -> given_method:meth
   -> given_path:string list
   -> given_query_params:(string * string) list
   -> ('request, 'response) service list
@@ -1123,6 +1127,7 @@ include module type of Infix (** @inline *)
     the main module). *)
 
 module Void = Void
+module Pct = Pct
 module Sigs = Sigs
 module Args = Args
 module Hole = Hole

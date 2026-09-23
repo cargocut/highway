@@ -41,6 +41,7 @@ let dispatch services fallback request =
     let given_path = adapt_target (Dream.target request)
     and given_query_params = Dream.all_queries request in
     Highway.Service.dispatch
+      ~decode:false
       ~given_method
       ~given_path
       ~given_query_params

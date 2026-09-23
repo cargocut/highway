@@ -142,12 +142,13 @@ let has_method : type scope. Method.t -> (scope, _, _, _, _) t -> _ =
 ;;
 
 let extract_values
+      ?(decode = false)
       (Local { path; query_params; _ })
       ~given_path
       ~given_query_params
   =
   let ( let* ) = Option.bind in
-  let* args = Path.from_list path given_path in
-  let* params = Param.from_query query_params given_query_params in
+  let* args = Path.from_list ~decode path given_path in
+  let* params = Param.from_query ~decode query_params given_query_params in
   Some (args, params)
 ;;

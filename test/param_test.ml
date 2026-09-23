@@ -289,6 +289,29 @@ open struct
       in
       check (option @@ option bool) "should be equal" expected computed)
   ;;
+
+  let from_query11 =
+    test_case "from_query" `Quick (fun () ->
+      let subject =
+        [ "title", "foo+bar+baz"
+        ; "length", "43"
+        ; "chars", "a"
+        ; "chars", "Z"
+        ; "aliases", "xvw"
+        ; "aliases", "xvw2%20grm"
+        ]
+      in
+      let expected =
+        Some
+          (Desc.make
+             ~title:"foo bar baz"
+             ~length:43
+             ~chars:[ 'a'; 'Z' ]
+             ~aliases:[ "xvw"; "xvw2 grm" ]
+             ())
+      and computed = Highway.Param.from_query ~decode:true desc subject in
+      check (option Desc.testable) "should be equal" expected computed)
+  ;;
 end
 
 let cases =
@@ -308,5 +331,6 @@ let cases =
     ; from_query8
     ; from_query9
     ; from_query10
+    ; from_query11
     ] )
 ;;
